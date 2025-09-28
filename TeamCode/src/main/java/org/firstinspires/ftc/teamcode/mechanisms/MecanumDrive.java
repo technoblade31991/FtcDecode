@@ -36,14 +36,14 @@ public class MecanumDrive {
         imu.initialize(new IMU.Parameters(revOrientation));
     }
 
-    public void driveRelativeRobot(double forward, double strafe, double rotate, double l2, double r2) {
+    public void driveRelativeRobot(double forward, double strafe, double rotate) {
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
         double frontRightPower = forward - strafe - rotate;
         double backRightPower = forward + strafe - rotate;
 
-        double maxPower = 0.5 * (1 - l2) / (1 - r2) ;
-        double maxSpeed = 0.5 * (1 - l2) / (1 - r2);
+        double maxPower = 1;
+        double maxSpeed = 1;
 
         maxPower = Math.max(maxPower, Math.abs(frontLeftPower));
         maxPower = Math.max(maxPower, Math.abs(backLeftPower));
@@ -65,6 +65,6 @@ public class MecanumDrive {
         double newForward = r * Math.sin(theta);
         double newStrafe = r * Math.cos(theta);
 
-        this.driveRelativeRobot(newForward, newStrafe, rotate, l2, r2);
+        this.driveRelativeRobot(newForward, newStrafe, rotate);
     }
 }
