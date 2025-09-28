@@ -20,7 +20,7 @@ public class MecanumRobotOrientatedOpMode extends OpMode {
         strafe = gamepad1.right_stick_y;
         rotate = gamepad1.left_stick_x;
 
-        drive.driveRelativeRobot(1, 0, 0);
-
+        drive.driveRelativeRobot(forward, strafe, rotate);
+9
     }
 }
