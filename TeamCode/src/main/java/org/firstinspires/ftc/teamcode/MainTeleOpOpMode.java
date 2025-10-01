@@ -1,31 +1,52 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 @TeleOp(name = "MainTeleOpOpMode")
 public class MainTeleOpOpMode extends LinearOpMode {
-    private CRServo left_feeder;
-    private CRServo right_feeder;
-    private DcMotor launcher;
+    private static final double LAUNCH_LAUNCHER_POWER = 0.6;
+    private static final long LAUNCH_SLEEP_MS = 3000;
+    private static final double LAUNCH_LEFT_FEEDER_POWER = 1;
+    private static final double LAUNCH_RIGHT_FEEDER_POWER = 1;
+    private static final double STOP_LAUNCHER_POWER = 0;
+    private static final double STOP_LEFT_FEEDER_POWER = 0;
+    private static final double STOP_RIGHT_FEEDER_POWER = 0;
+    double forward, strafe, rotate;
+
+
     @Override
     public void runOpMode() {
-        left_feeder = hardwareMap.crservo.get("left_feeder");
-        right_feeder = hardwareMap.crservo.get("right_feeder");
-        launcher = hardwareMap.dcMotor.get("launcher");
+        CRServo left_feeder = hardwareMap.crservo.get("left_feeder");
+        CRServo right_feeder = hardwareMap.crservo.get("right_feeder");
+        DcMotor launcher = null;
+        try {
+            launcher = hardwareMap.dcMotor.get("launcher");
+        } catch (Exception e) {
+            telemetry.addData("ERROR", "LAUNCHER not found");
+        }
         left_feeder.setDirection(DcMotorSimple.Direction.REVERSE);
         waitForStart();
         while (opModeIsActive()) {
-            launcher.setPower(0.6);
-            sleep(3000);
-            left_feeder.setPower(1);
-            right_feeder.setPower(1);
+            if (gamepad1.right_bumper) {
+                if (launcher != null){
+                    launcher.setPower(LAUNCH_LAUNCHER_POWER);
+                }
+                sleep(LAUNCH_SLEEP_MS);
+                left_feeder.setPower(LAUNCH_LEFT_FEEDER_POWER);
+                right_feeder.setPower(LAUNCH_RIGHT_FEEDER_POWER);
+            } else if (gamepad1.left_bumper) {
+                break;
+            } else {
+                if (launcher != null) {
+                    launcher.setPower(STOP_LAUNCHER_POWER);
+                }
+                    left_feeder.setPower(STOP_LEFT_FEEDER_POWER);
+                right_feeder.setPower(STOP_RIGHT_FEEDER_POWER);
+            }
         }
     }
 }
