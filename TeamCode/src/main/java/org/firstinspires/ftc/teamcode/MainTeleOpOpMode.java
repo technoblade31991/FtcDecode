@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-@TeleOp(name = "ContinuousLauncherAutonomousOpMode")
-public class ContinuousLauncherAutonomousOpMode extends LinearOpMode {
+@TeleOp(name = "MainTeleOpOpMode")
+public class MainTeleOpOpMode extends LinearOpMode {
     private CRServo left_feeder;
     private CRServo right_feeder;
     private DcMotor launcher;
