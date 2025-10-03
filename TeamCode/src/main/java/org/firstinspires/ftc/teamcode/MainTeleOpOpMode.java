@@ -20,14 +20,25 @@ public class MainTeleOpOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        CRServo left_feeder = hardwareMap.crservo.get("left_feeder");
-        CRServo right_feeder = hardwareMap.crservo.get("right_feeder");
+        DCMotor left_feeder = null;
+        DCMotor right_feeder = null;
         DcMotor launcher = null;
+        try {
+            left_feeder = hardwareMap.crservo.get("left_feeder");
+        } catch (Exception e) {
+            telemetry.addData("ERROR", "LEFT FEEDER not found");
+        }
+        try {
+            right_feeder = hardwareMap.crservo.get("right_feeder");
+        } catch (Exception e) {
+            telemetry.addData("ERROR", "RIGHT FEEDER not found");
+        }
         try {
             launcher = hardwareMap.dcMotor.get("launcher");
         } catch (Exception e) {
             telemetry.addData("ERROR", "LAUNCHER not found");
         }
+        // Set left feeder direction to REVERSE to make launching more intuitive by removing negative values
         left_feeder.setDirection(DcMotorSimple.Direction.REVERSE);
         waitForStart();
         while (opModeIsActive()) {
@@ -44,7 +55,7 @@ public class MainTeleOpOpMode extends LinearOpMode {
                 if (launcher != null) {
                     launcher.setPower(STOP_LAUNCHER_POWER);
                 }
-                    left_feeder.setPower(STOP_LEFT_FEEDER_POWER);
+                left_feeder.setPower(STOP_LEFT_FEEDER_POWER);
                 right_feeder.setPower(STOP_RIGHT_FEEDER_POWER);
             }
         }
