@@ -29,8 +29,8 @@ public class MecanumDrive {
 
         // Square orientation right angle control hub needed
         RevHubOrientationOnRobot revOrientation = new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
+                RevHubOrientationOnRobot.UsbFacingDirection.LEFT
         );
 
         imu.initialize(new IMU.Parameters(revOrientation));
