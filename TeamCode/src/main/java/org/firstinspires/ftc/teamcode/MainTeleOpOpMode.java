@@ -6,7 +6,9 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "MainTeleOpOpMode")
+import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
+
+@TeleOp(name = "MainTeleOpOpModeCombinedAb01")
 public class MainTeleOpOpMode extends LinearOpMode {
     private static final double LAUNCH_LAUNCHER_POWER = 0.6;
     private static final long LAUNCH_SLEEP_MS = 3000;
@@ -17,12 +19,20 @@ public class MainTeleOpOpMode extends LinearOpMode {
     private static final double STOP_RIGHT_FEEDER_POWER = 0;
     double forward, strafe, rotate;
 
+    MecanumDrive drive;
 
     @Override
     public void runOpMode() {
         CRServo left_feeder = hardwareMap.crservo.get("left_feeder");
         CRServo right_feeder = hardwareMap.crservo.get("right_feeder");
         DcMotor launcher = null;
+
+        drive  = new MecanumDrive();
+
+        drive.init(hardwareMap);
+
+
+
         try {
             launcher = hardwareMap.dcMotor.get("launcher");
         } catch (Exception e) {
@@ -47,6 +57,10 @@ public class MainTeleOpOpMode extends LinearOpMode {
                     left_feeder.setPower(STOP_LEFT_FEEDER_POWER);
                 right_feeder.setPower(STOP_RIGHT_FEEDER_POWER);
             }
+            forward = gamepad1.right_stick_y;
+            strafe = gamepad1.right_stick_x;
+            rotate = gamepad1.left_stick_x;
+            drive.driveRelativeRobot(forward, strafe, rotate);
         }
     }
 }

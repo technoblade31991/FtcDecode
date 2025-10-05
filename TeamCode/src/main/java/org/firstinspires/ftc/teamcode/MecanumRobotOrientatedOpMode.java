@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 
-@TeleOp(name = "MecanumRobotOrientatedOpMode")
+@TeleOp(name = "MecanumRobotOrientatedOpModeAA")
 public class MecanumRobotOrientatedOpMode extends OpMode {
     double forward, strafe, rotate;
     MecanumDrive drive = new MecanumDrive();
@@ -16,8 +16,8 @@ public class MecanumRobotOrientatedOpMode extends OpMode {
 
     @Override
     public void loop() {
-        forward = gamepad1.right_stick_x;
-        strafe = gamepad1.right_stick_y;
+        forward = gamepad1.right_stick_y;
+        strafe = gamepad1.right_stick_x;
         rotate = gamepad1.left_stick_x;
 
         drive.driveRelativeRobot(forward, strafe, rotate);
