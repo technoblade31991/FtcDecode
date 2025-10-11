@@ -5,11 +5,26 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 
 @TeleOp(name = "MainTeleOpOpModeCombinedAb01")
 public class MainTeleOpOpMode extends LinearOpMode {
+    enum State {
+        OFF,
+        STARTING,
+        FIRST_TIMER,
+        FEED,
+        SECOND_TIMER,
+        LAUNCHING,
+        THIRD_TIMER,
+        STOPPING,
+
+    }
+    private State state = State.OFF;
+    private ElapsedTime starttimer = new ElapsedTime();
+
     private static final double LAUNCH_LAUNCHER_POWER = 0.6;
     private static final long LAUNCH_SLEEP_MS = 3000;
     private static final double LAUNCH_LEFT_FEEDER_POWER = 1;
@@ -41,21 +56,20 @@ public class MainTeleOpOpMode extends LinearOpMode {
         left_feeder.setDirection(DcMotorSimple.Direction.REVERSE);
         waitForStart();
         while (opModeIsActive()) {
-            if (gamepad1.right_bumper) {
-                if (launcher != null){
+          switch (state) {
+                case OFF:
+                    if (gamepad2.right_bumper) {
+                        state = State.STARTING;
+
+                    }
+                    break;
+                case STARTING:
                     launcher.setPower(LAUNCH_LAUNCHER_POWER);
-                }
-                sleep(LAUNCH_SLEEP_MS);
-                left_feeder.setPower(LAUNCH_LEFT_FEEDER_POWER);
-                right_feeder.setPower(LAUNCH_RIGHT_FEEDER_POWER);
-            } else if (gamepad1.left_bumper) {
-                break;
-            } else {
-                if (launcher != null) {
-                    launcher.setPower(STOP_LAUNCHER_POWER);
-                }
-                    left_feeder.setPower(STOP_LEFT_FEEDER_POWER);
-                right_feeder.setPower(STOP_RIGHT_FEEDER_POWER);
+                    if (gamepad2.left_bumper) {
+                        state = State.STOPPING;
+                    }
+state = State.FIRST_TIMER;
+                    starttimer.reset();
             }
             forward = gamepad1.right_stick_y;
             strafe = gamepad1.right_stick_x;
