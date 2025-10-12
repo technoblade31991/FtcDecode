@@ -25,7 +25,7 @@ public class MainTeleOpOpMode extends LinearOpMode {
     private State state = State.OFF;
     private ElapsedTime starttimer = new ElapsedTime();
 
-    private static final double LAUNCH_LAUNCHER_POWER = 0.8;
+    private static final double LAUNCH_LAUNCHER_POWER = 0.4;
     private static final long LAUNCH_SLEEP_MS = 3000;
     private static final double LAUNCH_LEFT_FEEDER_POWER = 1;
     private static final double LAUNCH_RIGHT_FEEDER_POWER = 1;
@@ -46,8 +46,6 @@ public class MainTeleOpOpMode extends LinearOpMode {
 
         drive.init(hardwareMap);
 
-
-
         try {
             launcher = hardwareMap.dcMotor.get("launcher");
         } catch (Exception e) {
@@ -56,10 +54,13 @@ public class MainTeleOpOpMode extends LinearOpMode {
         left_feeder.setDirection(DcMotorSimple.Direction.REVERSE);
         waitForStart();
         while (opModeIsActive()) {
+            telemetry.addData("state",state);
+            telemetry.update();
           switch (state) {
               case OFF:
                   if (gamepad2.right_bumper) {
                       state = State.STARTING;
+
                       starttimer.reset();
                       launcher.setPower(LAUNCH_LAUNCHER_POWER);
 
@@ -68,22 +69,25 @@ public class MainTeleOpOpMode extends LinearOpMode {
               case STARTING:
                   if (starttimer.seconds() > 3) {
                       state = State.FEED;
+
                       starttimer.reset();
                       left_feeder.setPower(LAUNCH_LEFT_FEEDER_POWER);
                       right_feeder.setPower(LAUNCH_RIGHT_FEEDER_POWER);
                   }
                   break;
               case FEED:
-                  if (starttimer.seconds() > 3) {
+                  if (starttimer.milliseconds() > 1200) {
                       state = State.LAUNCHING;
                       starttimer.reset();
                       left_feeder.setPower(STOP_LEFT_FEEDER_POWER);
                       right_feeder.setPower(STOP_RIGHT_FEEDER_POWER);
                   }
+                  break;
               case LAUNCHING:
                   if (starttimer.seconds() > 3) {
                       state = State.STOPPING;
                       starttimer.reset();
+                      launcher.setPower(LAUNCH_LAUNCHER_POWER);
                   }
                   break;
               case STOPPING:
@@ -92,6 +96,7 @@ public class MainTeleOpOpMode extends LinearOpMode {
                   launcher.setPower(STOP_LAUNCHER_POWER);
                   state = State.OFF;
           }
+          telemetry.update();
           if (gamepad2.left_bumper) {
               state = State.STOPPING;
               break;
