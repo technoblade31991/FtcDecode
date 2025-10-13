@@ -1,0 +1,23 @@
+Back is the wall visible to FOV straight forward.
+Trial 1A: Purple: Failed: Went Backwards
+Trial 1B: Purple: Passed: Went in the center towards the back
+Trial 1C: Purple: Passed: Went in the center towards the back
+Trial 2A: Purple: Semi-Passed: Bounced on the front rim, then went back on the back of the robot, ball was not moved, re-launch made success, therefore reported Semi-Passed
+Trial 2B: Purple: Passed: Went in the center towards the front
+Trial 2C: Purple: Failed: Went up and did not bounce, Then went on the front safety corner protector, and bounced off, failed.
+Trial 3A: Purple: Failed: Went up and bounced on center of robot, bounced off, failed
+Trial 3B: Purple: Passed: Went in the center towards the back
+Trial 3C: Purple: Failed: Went up and did not bounce, Then went on the front safety corner protector, and bounced off, failed.
+Trial 4A: Green: Passed: Went in the center
+Trial 4B: Green: Passed: Went in the center
+Trial 4C: Green: Passed: Went in the center
+Extraordinary results have been found for ball 4, 3 more experiments on this ball will be taken
+Trial 4D: Green: Failed: Bounced on the front rim, then bounced on middle of robot, then bounced off, therefore reported as Failed
+Trial 4E: Green: Passed: Went in the center, therefore reported as passed
+Trial 4F: Green: Failed: Went up and did not bounce, Then went on the front safety corner protector, and bounced off, failed.
+Trial 5A: Green: Failed: Went Backwards
+Trial 5B: Green: Failed: Went forward, then hit left center of robot on top above left motor, then bounced off, failed
+Trial 5C: Green: Passed: Went in center towards the back
+Trial 6A: Purple: Failed: Bounced off
+Trial 6B: Purple: Failed: Went up and did not bounce, Then went on the front safety corner protector, and bounced off, failed.
+Trial 6A: Purple: Passed: Hit back of goal, then went down in center, passed
