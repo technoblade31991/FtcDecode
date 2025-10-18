@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.mechanisms.AprilTag;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 
 @TeleOp(name = "MainTeleOpOpModeCombinedAb01")
@@ -34,7 +35,6 @@ public class MainTeleOpOpMode extends LinearOpMode {
 
     double forward, strafe, rotate;
 
-    MecanumDrive drive;
     private CRServo left_feeder = null;
     private CRServo right_feeder = null;
     private DcMotor launcher = null;
@@ -42,9 +42,11 @@ public class MainTeleOpOpMode extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Initialize hardware
+        AprilTag aprilTag = new AprilTag();
+        aprilTag.init(hardwareMap);
 
         // Initialize mecanum drive
-        drive = new MecanumDrive();
+        MecanumDrive drive = new MecanumDrive();
         drive.init(hardwareMap);
 
         // Initialize left feeder servo and set to reverse direction
@@ -78,6 +80,7 @@ public class MainTeleOpOpMode extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             telemetry.addData("state", state);
+            aprilTag.addTelemetry();
             telemetry.update();
             switch (state) {
                 case OFF:
