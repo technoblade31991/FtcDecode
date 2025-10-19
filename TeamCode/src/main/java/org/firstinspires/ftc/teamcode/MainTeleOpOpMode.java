@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTag;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
@@ -11,13 +10,14 @@ import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 public class MainTeleOpOpMode extends LinearOpMode {
 
     double forward, strafe, rotate;
-    private static final boolean DRIVE_ENABLED = true;
 
-
-
+    private static final boolean DRIVE_ENABLED = false;
+    private static final boolean SHOOT_ENABLED = true;
     @Override
     public void runOpMode() {
         // Initialize hardware
+
+        // Initialize aprilTag
         AprilTag aprilTag = new AprilTag();
         aprilTag.init(hardwareMap);
 
@@ -29,13 +29,21 @@ public class MainTeleOpOpMode extends LinearOpMode {
         } else {
             drive = null;
         }
-        Shooter shooter = new Shooter();
-        shooter.init(hardwareMap);
+        Shooter shooter;
+        if (SHOOT_ENABLED) {
+            shooter = new Shooter();
+            shooter.init(hardwareMap, gamepad2, telemetry);
+        } else {
+            shooter = null;
+        }
 
         waitForStart();
         while (opModeIsActive()) {
-            aprilTag.addTelemetry();
-            shooter.listen();
+
+            aprilTag.addTelemetry(telemetry);
+            if (SHOOT_ENABLED) {
+                shooter.listen();
+            }
             /* Mecanum drive control
              * Left stick Y axis = forward/backward
              * Left stick X axis = strafe left/right
@@ -43,11 +51,11 @@ public class MainTeleOpOpMode extends LinearOpMode {
              * Drive relative to the field (not the robot) when right trigger is pressed
              */
             if (DRIVE_ENABLED) {
-
-                forward = gamepad1.right_stick_y;
+                // Forward is reversed due to weird issues
+                forward = -gamepad1.right_stick_y;
                 strafe = gamepad1.right_stick_x;
                 rotate = gamepad1.left_stick_x;
-                drive.driveRelativeRobot(forward, strafe, rotate);
+                drive.driveRelativeField(forward, strafe, rotate);
             }
 
             telemetry.update();

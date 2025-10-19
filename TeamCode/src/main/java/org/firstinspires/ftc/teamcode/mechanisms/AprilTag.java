@@ -1,14 +1,14 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
+import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
@@ -17,6 +17,7 @@ import java.util.Locale;
 public class AprilTag {
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
     private AprilTagProcessor aprilTag;
+    public AprilTagPoseFtc pose;
 
     public void init(HardwareMap hardwareMap) {
         // Create the AprilTag processor.
@@ -50,7 +51,7 @@ public class AprilTag {
         }
     }
 
-    public void addTelemetry() {
+    public void addTelemetry(Telemetry telemetry) {
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         telemetry.addData("# AprilTags Detected", currentDetections.size());
 
@@ -62,6 +63,7 @@ public class AprilTag {
 
             // Print pose / range / bearing if available
             if (detection.ftcPose != null) {
+                this.pose = detection.ftcPose;
                 double x = detection.ftcPose.x;
                 double y = detection.ftcPose.y;
                 double z = detection.ftcPose.z;
@@ -80,5 +82,6 @@ public class AprilTag {
                 telemetry.addData("tag " + detection.id + " pose", "null");
             }
         }
+
     }
 }

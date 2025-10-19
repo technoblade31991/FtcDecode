@@ -1,17 +1,16 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad2;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.MainTeleOpOpMode;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Shooter {
+
     private enum State {
         OFF,
         STARTING,
@@ -22,19 +21,28 @@ public class Shooter {
     }
 
     private State state = State.OFF;
-    private static final double LAUNCH_LAUNCHER_POWER = 0.4;
-    private static final double LAUNCH_LAUNCHER_FULL_SPEED_MS = 3000;
+    private static final double LAUNCH_LAUNCHER_POWER = 0.67;
+    private static final double LAUNCH_LAUNCHER_FULL_SPEED_MS = 3_000;
     private static final double LAUNCH_LEFT_FEEDER_POWER = 1;
     private static final double LAUNCH_RIGHT_FEEDER_POWER = 1;
     private static final double LAUNCH_STOP_LEFT_FEEDER_POWER = 0;
     private static final double LAUNCH_STOP_RIGHT_FEEDER_POWER = 0;
-    private static final double LAUNCH_FEED_MS = 1_200;
-    private static final double LAUNCH_LAUNCHER_COMPLETE_MS = 3000;
+    private static final double LAUNCH_STOP_LAUNCHER_POWER = 0;
+    private static final double LAUNCH_FEED_MS_RESET = 1_400;
+    private static final double LAUNCH_FEED_MS_NO_RESET = 1_400;
+    private static final double LAUNCH_LAUNCHER_COMPLETE_MS = 200;
+    private static boolean reset = true;
+    private double launchFeedMs;
     private CRServo left_feeder = null;
     private CRServo right_feeder = null;
     private DcMotor launcher = null;
+    private Gamepad gamepad2;
+    private Telemetry telemetry;
     private final ElapsedTime timer = new ElapsedTime();
-    public void init(HardwareMap hardwareMap) {
+    public void init(HardwareMap hardwareMap, Gamepad gamepad2, Telemetry telemetry) {
+        // Add gamepad2 to self
+        this.gamepad2 = gamepad2;
+        this.telemetry = telemetry;
         // Initialize left feeder servo and set to reverse direction
         try {
             left_feeder = hardwareMap.crservo.get("left_feeder");
@@ -62,6 +70,8 @@ public class Shooter {
             telemetry.update();
         }
         assert launcher != null;
+        // Initialize launchFeedMs
+        this.launchFeedMs = 0;
     }
 
     public void listen() {
@@ -96,7 +106,25 @@ public class Shooter {
                 }
                 break;
             case FEED:
-                if (timer.milliseconds() > LAUNCH_FEED_MS) {
+                /* When ball is inserted, reset is true
+                 * After feeding a reset launch, reset is set to false
+                 * When second and third balls are launching, reset is false
+                 * When reset is true, LAUNCH_FEED_MS_RESET is used
+                 * When reset is false, LAUNCH_FEED_MS_NO_RESET is used
+                 * This is due to the fact that the first time a ball is launched,
+                 * the ball needs less time because it has not been fed.
+                 * However, due to inconsistencies, when the second and third ball
+                 * are launched, they are slightly fed.
+                 * This is why we give the second and third balls less time
+                 * So we set LAUNCH_FEED_MS based off of the boolean reset.
+                 */
+                if (reset) {
+                    reset = false;
+                    launchFeedMs = LAUNCH_FEED_MS_RESET;
+                } else {
+                    launchFeedMs = LAUNCH_FEED_MS_NO_RESET;
+                }
+                if (timer.milliseconds() > launchFeedMs) {
                     /* Once feed time is complete,transition to LAUNCHING state,
                      * start the timer and
                      * stop the servos so the second ball does not feed in.
@@ -108,7 +136,7 @@ public class Shooter {
                 }
                 break;
             case LAUNCHING:
-                if (timer.seconds() > LAUNCH_LAUNCHER_COMPLETE_MS) {
+                if (timer.milliseconds() > LAUNCH_LAUNCHER_COMPLETE_MS) {
                     /* Once launch time is complete,transition to STOPPING state.
                      * reset the timer and
                      * turn off the launcher so the battery does not drain
@@ -122,7 +150,7 @@ public class Shooter {
                 /* Stop all motors and servos and transition to OFF state */
                 left_feeder.setPower(LAUNCH_STOP_LEFT_FEEDER_POWER);
                 right_feeder.setPower(LAUNCH_STOP_RIGHT_FEEDER_POWER);
-                launcher.setPower(LAUNCH_LAUNCHER_POWER);
+                launcher.setPower(LAUNCH_STOP_LAUNCHER_POWER);
                 state = State.OFF;
                 break;
         }
@@ -133,6 +161,6 @@ public class Shooter {
             state = State.STOPPING;
             return;
         }
-        telemetry.addData("state", state);
+        this.telemetry.addData("state", state);
     }
 }
