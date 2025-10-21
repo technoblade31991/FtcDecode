@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -22,20 +21,17 @@ public class Shooter {
     }
 
     private State state = State.OFF;
-    @Configurable
-    public static class ShooterConfig {
 
-        public static double LAUNCH_LAUNCHER_POWER = 0.6;
-        public static double LAUNCH_LAUNCHER_FULL_SPEED_MS = 3_000;
-        public static double LAUNCH_LEFT_FEEDER_POWER = 1;
-        public static double LAUNCH_RIGHT_FEEDER_POWER = 1;
-        public static double LAUNCH_STOP_LEFT_FEEDER_POWER = 0;
-        public static double LAUNCH_STOP_RIGHT_FEEDER_POWER = 0;
-        public static double LAUNCH_STOP_LAUNCHER_POWER = 0;
-        public static double LAUNCH_FEED_MS_RESET = 1_200;
-        public static double LAUNCH_FEED_MS_NO_RESET = 1_200;
-        public static double LAUNCH_LAUNCHER_COMPLETE_MS = 200;
-    }
+    public static double LAUNCH_LAUNCHER_POWER = 0.6;
+    public static double LAUNCH_LAUNCHER_FULL_SPEED_MS = 2_000;
+    public static double LAUNCH_LEFT_FEEDER_POWER = 1;
+    public static double LAUNCH_RIGHT_FEEDER_POWER = 1;
+    public static double LAUNCH_STOP_LEFT_FEEDER_POWER = 0;
+    public static double LAUNCH_STOP_RIGHT_FEEDER_POWER = 0;
+    public static double LAUNCH_STOP_LAUNCHER_POWER = 0;
+    public static double LAUNCH_FEED_MS_RESET = 1_200;
+    public static double LAUNCH_FEED_MS_NO_RESET = 1_200;
+    public static double LAUNCH_LAUNCHER_COMPLETE_MS = 200;
     private static boolean reset = true;
     private double launchFeedMs;
     private CRServo left_feeder = null;
