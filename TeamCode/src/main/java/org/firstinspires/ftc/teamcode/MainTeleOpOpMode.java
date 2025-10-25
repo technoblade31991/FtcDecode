@@ -11,8 +11,8 @@ public class MainTeleOpOpMode extends LinearOpMode {
 
     double forward, strafe, rotate;
 
-    private static final boolean DRIVE_ENABLED = false;
-    private static final boolean SHOOT_ENABLED = true;
+    private static final boolean DRIVE_ENABLED = true;
+    private static final boolean SHOOT_ENABLED = false;
     @Override
     public void runOpMode() {
         // Initialize hardware
@@ -40,7 +40,7 @@ public class MainTeleOpOpMode extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
 
-            aprilTag.addTelemetry(telemetry);
+            aprilTag.listen(telemetry, gamepad1, drive);
             if (SHOOT_ENABLED) {
                 shooter.listen();
             }

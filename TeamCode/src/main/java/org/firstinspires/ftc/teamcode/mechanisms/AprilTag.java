@@ -1,14 +1,13 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
@@ -16,6 +15,14 @@ import java.util.List;
 
 public class AprilTag {
     private static final int DESIRED_TAG_ID = -1;     // Choose the tag you want to approach or set to -1 for ANY tag.
+    private static final double DESIRED_DISTANCE = 30.0;
+    private static final double SPEED_GAIN = 0.02;   //  Forward Speed Control "Gain". e.g. Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
+    private static final double STRAFE_GAIN = 0.015;   //  Strafe Speed Control "Gain".  e.g. Ramp up to 37% power at a 25 degree Yaw error.   (0.375 / 25.0)
+    private static final double TURN_GAIN = 0.01;   //  Turn Control "Gain".  e.g. Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
+    private static final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
+    private static final double MAX_AUTO_STRAFE = 0.5;   //  Clip the strafing speed to this max value (adjust for your robot)
+    private static final double MAX_AUTO_TURN = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
+    private static final double TURN_SPEED_FIND_TAG = 0.2;   //  Turn at this speed when searching for a tag.
 
     public AprilTagPoseFtc pose;
     private AprilTagProcessor aprilTag;
@@ -52,7 +59,7 @@ public class AprilTag {
                 .build();
     }
 
-    public void addTelemetry(Telemetry telemetry) {
+    public void listen(Telemetry telemetry, Gamepad gamepad1, MecanumDrive drive) {
         boolean targetFound = false;
         AprilTagDetection desiredTag = null;
         // Get a list of all AprilTags that are currently visible
@@ -92,6 +99,19 @@ public class AprilTag {
             telemetry.addData("Yaw", "%3.0f degrees", desiredTag.ftcPose.yaw);
         } else {
             telemetry.addData("\n>", "Drive using joysticks to find valid target\n");
+        }
+        if (gamepad1.a && targetFound) {
+
+            // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
+            double rangeError = (DESIRED_DISTANCE - desiredTag.ftcPose.range);
+            double headingError = -desiredTag.ftcPose.bearing;
+            double yawError = desiredTag.ftcPose.yaw;
+
+            // Use the speed and turn "gains" to calculate how we want the robot to move.
+            double forward = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
+            double rotate = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
+            double strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
+            drive.driveRelativeField(forward, strafe, rotate);
         }
     }
 
