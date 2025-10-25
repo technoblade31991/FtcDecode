@@ -15,10 +15,14 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 
 public class AprilTag {
+    private static final int DESIRED_TAG_ID = -1;     // Choose the tag you want to approach or set to -1 for ANY tag.
+
     public AprilTagPoseFtc pose;
     private AprilTagProcessor aprilTag;
 
     public void init(HardwareMap hardwareMap) {
+        boolean targetFound = false;    // Set to true when an AprilTag target is detected
+
         // --- Step 1: Hardware Configuration ---
         // Every webcam (like your C925) needs to be in your robot's
         // configuration file.
@@ -30,14 +34,6 @@ public class AprilTag {
         // This is the "brains" that will do the AprilTag detection.
         // We use .Builder() to create a new processor.
         aprilTag = new AprilTagProcessor.Builder()
-                // You can add all sorts of settings here, but
-                // the defaults are usually good to start!
-                .setDrawAxes(false)
-                .setDrawCubeProjection(false)
-                .setDrawTagOutline(true)
-                .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
-                .setTagLibrary(AprilTagGameDatabase.getCenterStageTagLibrary())
-                .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
                 .setLensIntrinsics(636.967, 636.967, 319.933, 251.434)
                 .build();
 
@@ -57,6 +53,8 @@ public class AprilTag {
     }
 
     public void addTelemetry(Telemetry telemetry) {
+        boolean targetFound = false;
+        AprilTagDetection desiredTag = null;
         // Get a list of all AprilTags that are currently visible
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         telemetry.addData("# AprilTags Detected", currentDetections.size());
@@ -68,22 +66,32 @@ public class AprilTag {
         }
 
         // Loop through all visible tags
-        for (AprilTagDetection detection : currentDetections) {
-            // Check that the tag is one from the FTC library
-            if (detection.metadata != null) {
-                // Print the Tag ID and Name
-                telemetry.addData("Tag", "ID %d (%s)", detection.id, detection.metadata.name);
-
-                // Print the navigation data (Pose)
-                // This is what you use to drive the robot!
-                telemetry.addData("Range", "%.1f in", detection.ftcPose.range);
-                telemetry.addData("Bearing", "%.1f deg", detection.ftcPose.bearing);
-                telemetry.addData("Yaw", "%.1f deg", detection.ftcPose.yaw);
-                telemetry.addLine("---");
-            } else {
-                telemetry.addData("Tag", "ID %d (Unknown Tag)", detection.id);
-                telemetry.addLine("---");
-            }
+         for (AprilTagDetection detection : currentDetections) {
+                        // Look to see if we have size info on this tag.
+                        if (detection.metadata != null) {
+                            //  Check to see if we want to track towards this tag.
+                            if ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID)) {
+                                // Yes, we want to use this tag.
+                                targetFound = true;
+                                desiredTag = detection;
+                                break;  // don't look any further.
+                            } else {
+                                // This tag is in the library, but we do not want to track it right now.
+                                telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
+                            }
+                        } else {
+                            // This tag is NOT in the library, so we don't have enough information to track to it.
+                            telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
+                        }
+                    }
+        if (targetFound) {
+            telemetry.addData("\n>", "HOLD Left-Bumper to Drive to Target\n");
+            telemetry.addData("Found", "ID %d (%s)", desiredTag.id, desiredTag.metadata.name);
+            telemetry.addData("Range", "%5.1f inches", desiredTag.ftcPose.range);
+            telemetry.addData("Bearing", "%3.0f degrees", desiredTag.ftcPose.bearing);
+            telemetry.addData("Yaw", "%3.0f degrees", desiredTag.ftcPose.yaw);
+        } else {
+            telemetry.addData("\n>", "Drive using joysticks to find valid target\n");
         }
     }
 
