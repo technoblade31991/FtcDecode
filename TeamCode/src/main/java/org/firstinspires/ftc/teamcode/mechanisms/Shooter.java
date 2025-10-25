@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
+
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -29,14 +33,14 @@ public class Shooter {
     public static double LAUNCH_STOP_LEFT_FEEDER_POWER = 0;
     public static double LAUNCH_STOP_RIGHT_FEEDER_POWER = 0;
     public static double LAUNCH_STOP_LAUNCHER_POWER = 0;
-    public static double LAUNCH_FEED_MS_RESET = 1_200;
-    public static double LAUNCH_FEED_MS_NO_RESET = 1_200;
+    public static double LAUNCH_FEED_MS_RESET = 1_150;
+    public static double LAUNCH_FEED_MS_NO_RESET = 1_150;
     public static double LAUNCH_LAUNCHER_COMPLETE_MS = 200;
     private static boolean reset = true;
     private double launchFeedMs;
     private CRServo left_feeder = null;
     private CRServo right_feeder = null;
-    private DcMotor launcher = null;
+    private DcMotorEx launcher = null;
     private Gamepad gamepad2;
     private Telemetry telemetry;
     private final ElapsedTime timer = new ElapsedTime();
@@ -65,12 +69,16 @@ public class Shooter {
 
         // Initialize launcher motor
         try {
-            launcher = hardwareMap.dcMotor.get("launcher");
+            launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         } catch (Exception e) {
             telemetry.addData("ERROR", "LAUNCHER not found");
             telemetry.update();
         }
         assert launcher != null;
+        launcher.setZeroPowerBehavior(BRAKE);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(300,0,0,10));
+
         // Initialize launchFeedMs
         this.launchFeedMs = 0;
     }
