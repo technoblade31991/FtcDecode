@@ -92,7 +92,7 @@ public class AprilTag {
                         }
                     }
         if (targetFound) {
-            telemetry.addData("\n>", "HOLD Left-Bumper to Drive to Target\n");
+            telemetry.addData("\n>", "HOLD A to Drive to Target\n");
             telemetry.addData("Found", "ID %d (%s)", desiredTag.id, desiredTag.metadata.name);
             telemetry.addData("Range", "%5.1f inches", desiredTag.ftcPose.range);
             telemetry.addData("Bearing", "%3.0f degrees", desiredTag.ftcPose.bearing);

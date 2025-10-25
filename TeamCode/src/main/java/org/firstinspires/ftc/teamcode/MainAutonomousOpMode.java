@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
+
 @TeleOp(name="Main Autonomous Op Mode", group="Linear OpMode")
 public class MainAutonomousOpMode extends LinearOpMode {
 
@@ -21,8 +23,17 @@ public class MainAutonomousOpMode extends LinearOpMode {
     static final double     DRIVE_SPEED             = 0.2;
     static final double     TARGET_DISTANCE_INCHES  = 36.0;
 
+    private static final boolean DRIVE_ENABLED = true;
+    private static final boolean SHOOT_ENABLED = true;
     @Override
     public void runOpMode() {
+        Shooter shooter;
+        if (SHOOT_ENABLED) {
+            shooter = new Shooter();
+            shooter.init(hardwareMap, gamepad2, telemetry);
+        } else {
+            shooter = null;
+        }
         // Initialize hardware
         frontLeft  = hardwareMap.get(DcMotor.class, "frontLeftMotor");
         frontRight = hardwareMap.get(DcMotor.class, "frontRightMotor");
@@ -50,6 +61,15 @@ public class MainAutonomousOpMode extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
+            if (SHOOT_ENABLED) {
+                for (int i = 0; i < 3; i++) {
+                    shooter.listen(true);
+                    while (!shooter.isOff()) {
+                        shooter.listen(false);
+                    }
+                }
+            }
+
             encoderDrive(DRIVE_SPEED, TARGET_DISTANCE_INCHES, 5.0);
         }
     }

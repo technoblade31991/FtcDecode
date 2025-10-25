@@ -12,7 +12,7 @@ public class MainTeleOpOpMode extends LinearOpMode {
     double forward, strafe, rotate;
 
     private static final boolean DRIVE_ENABLED = true;
-    private static final boolean SHOOT_ENABLED = false;
+    private static final boolean SHOOT_ENABLED = true;
     @Override
     public void runOpMode() {
         // Initialize hardware
@@ -42,7 +42,7 @@ public class MainTeleOpOpMode extends LinearOpMode {
 
             aprilTag.listen(telemetry, gamepad1, drive);
             if (SHOOT_ENABLED) {
-                shooter.listen();
+                shooter.listen(false);
             }
             /* Mecanum drive control
              * Left stick Y axis = forward/backward

@@ -83,11 +83,14 @@ public class Shooter {
         this.launchFeedMs = 0;
     }
 
-    public void listen() {
+    public boolean isOff() {
+        return state == State.OFF;
+    }
+    public void listen(boolean enforce) {
 
         switch (state) {
             case OFF:
-                if (gamepad2.right_bumper) {
+                if (gamepad2.right_bumper||enforce) {
                     /*
                      * Right bumper was pressed.
                      * Launching ball.
