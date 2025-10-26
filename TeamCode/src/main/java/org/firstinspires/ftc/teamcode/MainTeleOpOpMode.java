@@ -51,11 +51,11 @@ public class MainTeleOpOpMode extends LinearOpMode {
              * Drive relative to the field (not the robot) when right trigger is pressed
              */
             if (DRIVE_ENABLED) {
-                // Forward is reversed due to weird issues
-                forward = -gamepad1.right_stick_y;
-                strafe = gamepad1.right_stick_x;
+                forward = gamepad1.right_stick_y;
+                // Strafe is reversed due to weird issues
+                strafe = -gamepad1.right_stick_x;
                 rotate = gamepad1.left_stick_x;
-                drive.driveRelativeField(forward, strafe, rotate);
+                drive.driveRelativeRobot(forward, strafe, rotate);
             }
 
             telemetry.update();

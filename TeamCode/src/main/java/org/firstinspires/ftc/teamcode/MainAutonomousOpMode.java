@@ -21,7 +21,7 @@ public class MainAutonomousOpMode extends LinearOpMode {
                     (WHEEL_DIAMETER_INCHES * Math.PI);
 
     static final double     DRIVE_SPEED             = 0.2;
-    static final double     TARGET_DISTANCE_INCHES  = 36.0;
+    static final double     TARGET_DISTANCE_INCHES  = -10.0; // Move backward 10 inches
 
     private static final boolean DRIVE_ENABLED = true;
     private static final boolean SHOOT_ENABLED = true;
