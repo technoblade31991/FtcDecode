@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 
+@Disabled
 @TeleOp(name = "Anya_MecanumRobotOrientatedOpModeAA")
 public class MecanumRobotOrientatedOpMode extends OpMode {
     double forward, strafe, rotate;
