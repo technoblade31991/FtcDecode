@@ -1,4 +1,5 @@
 ## NOTICE
+To run the program, connect to the control hub wifi, open the terminal and run "adb connect 192.168.43.1" and press the Android Studio run button.. and
 
 This repository contains the public FTC SDK for the DECODE (2025-2026) competition season.
 

@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MecanumDrive {
     private DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
-    private IMU imu;
+    private IMU  imu;
     public void init(HardwareMap hwMap) {
         frontLeftMotor = hwMap.get(DcMotor.class, "frontLeftMotor");
         frontRightMotor = hwMap.get(DcMotor.class, "frontRightMotor");
@@ -29,8 +29,8 @@ public class MecanumDrive {
 
         // Square orientation right angle control hub needed
         RevHubOrientationOnRobot revOrientation = new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
+                RevHubOrientationOnRobot.UsbFacingDirection.LEFT
         );
 
         imu.initialize(new IMU.Parameters(revOrientation));
@@ -57,7 +57,7 @@ public class MecanumDrive {
 
     }
 
-    public void driveRelativeField(double forward, double strafe, double rotate, double l2, double r2) {
+    public void driveRelativeField(double forward, double strafe, double rotate) {
         double theta = Math.atan2(forward, strafe);
         double r = Math.hypot(strafe, forward);
         theta = AngleUnit.normalizeRadians(theta - imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
