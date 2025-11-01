@@ -66,9 +66,16 @@ public class MainAutonomousOpMode extends LinearOpMode {
                 for (int i = 0; i < 3; i++) {
                     shooter.listen(true);
                     while (!shooter.isOff()) {
+<<<<<<< HEAD
                         shooter.listen(false);
                     }
                 }
+=======
+                        shooter.listen(true);
+                    }
+                }
+                shooter.listen(false);
+>>>>>>> 81ac76f (WIP)
             }
 
             encoderDrive(DRIVE_SPEED, TARGET_DISTANCE_INCHES, 5.0);

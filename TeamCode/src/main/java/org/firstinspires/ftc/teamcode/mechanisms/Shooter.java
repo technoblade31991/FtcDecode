@@ -159,6 +159,22 @@ public class Shooter {
                 }
                 break;
             case STOPPING:
+<<<<<<< HEAD
+=======
+                if (gamepad2.right_bumper || enforce) {
+                    /*
+                     * Right bumper was pressed.
+                     * Launching ball.
+                     * Set state to STARTING, reset the timer and
+                     * start the launcher motor.
+                     */
+                    state = State.STARTING;
+
+                    timer.reset();
+                    launcher.setPower(LAUNCH_LAUNCHER_POWER);
+                    break;
+                }
+>>>>>>> 81ac76f (WIP)
                 /* Stop all motors and servos and transition to OFF state */
                 left_feeder.setPower(LAUNCH_STOP_LEFT_FEEDER_POWER);
                 right_feeder.setPower(LAUNCH_STOP_RIGHT_FEEDER_POWER);
