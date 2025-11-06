@@ -16,30 +16,34 @@ import org.firstinspires.ftc.teamcode.messages.TankLocalizerInputsMessage;
 
 public class Shooter {
 
-
-
     private enum State {
         OFF,
         STARTING,
         FEED,
         LAUNCHING,
         STOPPING
-
     }
 
+    /* Current state of the shooter mechanism */
     private State state = State.OFF;
+    /* Power constants for the launcher and servos. */
+    public static final double LAUNCH_STOP_LAUNCHER_POWER = 0; /* Launcher off power */
+    public static final double LAUNCH_LAUNCHER_POWER = 0.6; /* Launcher running power */
 
-    public static double LAUNCH_LAUNCHER_POWER = 0.6;
-    public static double LAUNCH_LAUNCHER_FULL_SPEED_MS = 1_500;
-    private static final double LAUNCH_LAUNCHER_ENFORCE_MS = 300;
-    public static double LAUNCH_LEFT_FEEDER_POWER = 1;
-    public static double LAUNCH_RIGHT_FEEDER_POWER = 1;
-    public static double LAUNCH_STOP_LEFT_FEEDER_POWER = 0;
-    public static double LAUNCH_STOP_RIGHT_FEEDER_POWER = 0;
-    public static double LAUNCH_STOP_LAUNCHER_POWER = 0;
-    public static double LAUNCH_FEED_MS_RESET = 1_150;
-    public static double LAUNCH_FEED_MS_NO_RESET = 1_150;
-    public static double LAUNCH_LAUNCHER_COMPLETE_MS = 200;
+    public static final double LAUNCH_STOP_LEFT_FEEDER_POWER = 0; /* Left feeder off power */
+    public static final double LAUNCH_STOP_RIGHT_FEEDER_POWER = 0; /* Right feeder off power */
+    public static final double LAUNCH_LEFT_FEEDER_POWER = 1; /* Left feeder running power */
+    public static final double LAUNCH_RIGHT_FEEDER_POWER = 1; /* Right feeder running power */
+
+    /* Time constants for the launcher and servos. */
+    public static final double LAUNCH_LAUNCHER_FULL_SPEED_MS = 1_500; /* Time for launcher to reach full speed */
+    public static final double LAUNCH_FEED_MS_RESET = 1_150; /* Time it takes for ball to pass through servos when reset is true */
+    public static final double LAUNCH_FEED_MS_NO_RESET = 1_150; /* Time it takes for ball to pass through servos when reset is false.
+                                                           * Note that currently this is equal to LAUNCH_FEED_MS_RESET.
+                                                           */
+    public static final double LAUNCH_LAUNCHER_COMPLETE_MS = 200; /* Time for ball to launch once it is past servos */
+
+    private static final double LAUNCH_LAUNCHER_ENFORCE_MS = 300; /* Time to wait before re-feeding when enforcing continuous launch */
     private static boolean reset = true;
     private double launchFeedMs;
     private CRServo left_feeder = null;
@@ -81,6 +85,7 @@ public class Shooter {
         assert launcher != null;
         launcher.setZeroPowerBehavior(BRAKE);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        /* Use PIDF coefficients to control launcher velocity */
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(300,0,0,10));
 
         // Initialize launchFeedMs
@@ -88,6 +93,9 @@ public class Shooter {
     }
 
     public boolean isOff() {
+        /* Here we check for STOPPING not OFF, because when we have multiple launches,
+         * we transition from STOPPING to FEED directly.
+         */
         return state == State.STOPPING;
     }
     public boolean isFeeding(){
@@ -155,7 +163,7 @@ public class Shooter {
                 }
                 break;
             case LAUNCHING:
-                 if (timer.milliseconds() > LAUNCH_LAUNCHER_COMPLETE_MS) {
+                if (timer.milliseconds() > LAUNCH_LAUNCHER_COMPLETE_MS) {
                     /* Once launch time is complete,transition to STOPPING state.
                      * reset the timer and
                      * turn off the launcher so the battery does not drain
@@ -167,7 +175,7 @@ public class Shooter {
 
                 break;
             case STOPPING:
-                // In case of continuous launch enforcement, we need to go back to FEED state
+                /* In case of continuous launch enforcement, we need to go back to FEED state */
                 if (gamepad2.right_bumper || enforce) {
                     if (timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS) {
                         state = State.FEED;
@@ -197,6 +205,7 @@ public class Shooter {
     }
     public void launch_n_balls(int n){
 
+        /* Launch n balls in succession */
         for (int i = 0; i < n; i++) {
             telemetry.addData("Shooting", "Ball %d", i + 1);
 
