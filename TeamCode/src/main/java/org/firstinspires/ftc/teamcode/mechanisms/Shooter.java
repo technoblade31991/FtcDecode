@@ -15,12 +15,14 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Shooter {
 
+
+
     private enum State {
         OFF,
         STARTING,
         FEED,
         LAUNCHING,
-        STOPPING,
+        STOPPING;,
 
     }
 
@@ -28,6 +30,7 @@ public class Shooter {
 
     public static double LAUNCH_LAUNCHER_POWER = 0.6;
     public static double LAUNCH_LAUNCHER_FULL_SPEED_MS = 1_500;
+    private static final double LAUNCH_LAUNCHER_ENFORCE_MS = 300;
     public static double LAUNCH_LEFT_FEEDER_POWER = 1;
     public static double LAUNCH_RIGHT_FEEDER_POWER = 1;
     public static double LAUNCH_STOP_LEFT_FEEDER_POWER = 0;
@@ -160,8 +163,9 @@ public class Shooter {
 
                 break;
             case STOPPING:
+                // In case of continuous launch enforcement, we need to go back to FEED state
                 if (gamepad2.right_bumper || enforce) {
-                    if (timer.milliseconds() > 300) {
+                    if (timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS) {
                         state = State.FEED;
                         break;
                     }
