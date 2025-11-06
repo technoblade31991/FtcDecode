@@ -26,6 +26,8 @@ public class MainAutonomousOpMode extends LinearOpMode {
 
     private static final boolean DRIVE_ENABLED = true;
     private static final boolean SHOOT_ENABLED = true;
+
+    private static final int NUM_BALLS = 3;
     @Override
     public void runOpMode() {
         Shooter shooter;
@@ -63,14 +65,9 @@ public class MainAutonomousOpMode extends LinearOpMode {
 
         if (opModeIsActive()) {
             if (SHOOT_ENABLED) {
-                for (int i = 0; i < 3; i++) {
-                    shooter.listen(true);
-                    while (!shooter.isOff()) {
-                        shooter.listen(false);
-                    }
-                }
-            }
 
+                shooter.launch_n_balls(NUM_BALLS);
+            }
             encoderDrive(DRIVE_SPEED, TARGET_DISTANCE_INCHES, 5.0);
         }
     }

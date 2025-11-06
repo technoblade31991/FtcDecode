@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.messages.TankLocalizerInputsMessage;
 
 public class Shooter {
 
@@ -22,7 +23,7 @@ public class Shooter {
         STARTING,
         FEED,
         LAUNCHING,
-        STOPPING;,
+        STOPPING
 
     }
 
@@ -88,6 +89,9 @@ public class Shooter {
 
     public boolean isOff() {
         return state == State.STOPPING;
+    }
+    public boolean isFeeding(){
+        return state == State.FEED;
     }
     public void listen(boolean enforce) {
 
@@ -167,6 +171,10 @@ public class Shooter {
                 if (gamepad2.right_bumper || enforce) {
                     if (timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS) {
                         state = State.FEED;
+                        left_feeder.setPower(LAUNCH_LEFT_FEEDER_POWER);
+                        right_feeder.setPower(LAUNCH_RIGHT_FEEDER_POWER);
+
+                        timer.reset();
                         break;
                     }
                 } else {
@@ -186,5 +194,25 @@ public class Shooter {
             return;
         }
         this.telemetry.addData("state", state);
+    }
+    public void launch_n_balls(int n){
+
+        for (int i = 0; i < n; i++) {
+            telemetry.addData("Shooting", "Ball %d", i + 1);
+
+            telemetry.update();
+            listen(true);
+
+            while(!isFeeding()){
+                telemetry.addData("Shooting loop", "Ball %d", i + 1);
+                listen(true);
+                telemetry.update();
+            }
+            while (!isOff()) {
+                telemetry.addData("Shooting loop", "Ball %d", i + 1);
+                listen(true);
+                telemetry.update();
+            }
+        }
     }
 }
