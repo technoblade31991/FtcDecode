@@ -27,7 +27,7 @@ public class Shooter {
     private State state = State.OFF;
 
     public static double LAUNCH_LAUNCHER_POWER = 0.6;
-    public static double LAUNCH_LAUNCHER_FULL_SPEED_MS = 2_000;
+    public static double LAUNCH_LAUNCHER_FULL_SPEED_MS = 1_500;
     public static double LAUNCH_LEFT_FEEDER_POWER = 1;
     public static double LAUNCH_RIGHT_FEEDER_POWER = 1;
     public static double LAUNCH_STOP_LEFT_FEEDER_POWER = 0;
@@ -84,7 +84,7 @@ public class Shooter {
     }
 
     public boolean isOff() {
-        return state == State.OFF;
+        return state == State.STOPPING;
     }
     public void listen(boolean enforce) {
 
@@ -148,7 +148,7 @@ public class Shooter {
                 }
                 break;
             case LAUNCHING:
-                if (timer.milliseconds() > LAUNCH_LAUNCHER_COMPLETE_MS) {
+                 if (timer.milliseconds() > LAUNCH_LAUNCHER_COMPLETE_MS) {
                     /* Once launch time is complete,transition to STOPPING state.
                      * reset the timer and
                      * turn off the launcher so the battery does not drain
@@ -157,29 +157,21 @@ public class Shooter {
                     timer.reset();
                     launcher.setPower(LAUNCH_LAUNCHER_POWER);
                 }
+
                 break;
             case STOPPING:
-<<<<<<< HEAD
-=======
                 if (gamepad2.right_bumper || enforce) {
-                    /*
-                     * Right bumper was pressed.
-                     * Launching ball.
-                     * Set state to STARTING, reset the timer and
-                     * start the launcher motor.
-                     */
-                    state = State.STARTING;
-
-                    timer.reset();
-                    launcher.setPower(LAUNCH_LAUNCHER_POWER);
-                    break;
+                    if (timer.milliseconds() > 300) {
+                        state = State.FEED;
+                        break;
+                    }
+                } else {
+                    /* Stop all motors and servos and transition to OFF state */
+                    left_feeder.setPower(LAUNCH_STOP_LEFT_FEEDER_POWER);
+                    right_feeder.setPower(LAUNCH_STOP_RIGHT_FEEDER_POWER);
+                    launcher.setPower(LAUNCH_STOP_LAUNCHER_POWER);
+                    state = State.OFF;
                 }
->>>>>>> 81ac76f (WIP)
-                /* Stop all motors and servos and transition to OFF state */
-                left_feeder.setPower(LAUNCH_STOP_LEFT_FEEDER_POWER);
-                right_feeder.setPower(LAUNCH_STOP_RIGHT_FEEDER_POWER);
-                launcher.setPower(LAUNCH_STOP_LAUNCHER_POWER);
-                state = State.OFF;
                 break;
         }
         /* At any point, if the left bumper is pressed,
