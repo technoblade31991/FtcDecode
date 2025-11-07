@@ -29,7 +29,7 @@ public class Shooter {
     /* Power constants for the launcher and servos. */
     public static final double LAUNCH_STOP_LAUNCHER_POWER = 0; /* Launcher off power */
     public static final double LAUNCH_LAUNCHER_POWER = 0.6; /* Launcher running power */
-
+    public static final double LAUNCHER_TARGET_VELOCITY = 1390; /* Target velocity for launcher */
     public static final double LAUNCH_STOP_LEFT_FEEDER_POWER = 0; /* Left feeder off power */
     public static final double LAUNCH_STOP_RIGHT_FEEDER_POWER = 0; /* Right feeder off power */
     public static final double LAUNCH_LEFT_FEEDER_POWER = 1; /* Left feeder running power */
@@ -44,10 +44,11 @@ public class Shooter {
     public static final double LAUNCH_LAUNCHER_COMPLETE_MS = 200; /* Time for ball to launch once it is past servos */
 
     private static final double LAUNCH_LAUNCHER_ENFORCE_MS = 300; /* Time to wait before re-feeding when enforcing continuous launch */
-    private static boolean reset = true;
     private double launchFeedMs;
+    private static boolean reset = true;
     private CRServo left_feeder = null;
     private CRServo right_feeder = null;
+
     private DcMotorEx launcher = null;
     private Gamepad gamepad2;
     private Telemetry telemetry;
@@ -120,7 +121,7 @@ public class Shooter {
                 }
                 break;
             case STARTING:
-                if (timer.milliseconds() > LAUNCH_LAUNCHER_FULL_SPEED_MS) {
+                if ((launcher.getVelocity() >= LAUNCHER_TARGET_VELOCITY) || (timer.milliseconds() > LAUNCH_LAUNCHER_FULL_SPEED_MS)) {
                     /* Once launcher motor is at full speed,
                      * set the state to FEED, reset the timer and
                      * start the launcher servos.
@@ -133,6 +134,7 @@ public class Shooter {
                 }
                 break;
             case FEED:
+                telemetry.addData("Launch Velocity",launcher.getVelocity());
                 /* When ball is inserted, reset is true
                  * After feeding a reset launch, reset is set to false
                  * When second and third balls are launching, reset is false
@@ -177,7 +179,7 @@ public class Shooter {
             case STOPPING:
                 /* In case of continuous launch enforcement, we need to go back to FEED state */
                 if (gamepad2.right_bumper || enforce) {
-                    if (timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS) {
+                    if ((launcher.getVelocity() >= LAUNCHER_TARGET_VELOCITY) ||(timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS)) {
                         state = State.FEED;
                         left_feeder.setPower(LAUNCH_LEFT_FEEDER_POWER);
                         right_feeder.setPower(LAUNCH_RIGHT_FEEDER_POWER);
