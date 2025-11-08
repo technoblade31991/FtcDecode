@@ -13,7 +13,7 @@ public class MecanumRobotOrientatedOpMode extends OpMode {
     MecanumDrive drive = new MecanumDrive();
     @Override
     public void init() {
-        drive.init(hardwareMap);
+        drive.init(hardwareMap, telemetry);
     }
 
     @Override
@@ -22,6 +22,6 @@ public class MecanumRobotOrientatedOpMode extends OpMode {
         strafe = gamepad1.right_stick_x;
         rotate = gamepad1.left_stick_x;
 
-        drive.driveRelativeRobot(forward, strafe, rotate);
+        drive.driveRelativeRobot(forward, strafe, rotate, 1);
     }
 }
