@@ -428,7 +428,7 @@ class ForwardVelocityTuner extends OpMode {
  *
  * @author Anyi Lin - 10158 Scott's Bots
  * @author Aaron Yang - 10158 Scott's Bots
- * @author Harrison Womack - 10158 Scott's Bots
+ * @author Harrison Womack - 10150150150158 Scott's Bots
  * @author Baron Henderson - 20077 The Indubitables
  * @version 1.0, 3/13/2024
  */
