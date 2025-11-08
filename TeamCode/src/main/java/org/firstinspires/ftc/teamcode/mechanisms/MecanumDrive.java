@@ -50,19 +50,7 @@ public class MecanumDrive {
         maxPower = Math.max(maxPower, Math.abs(backLeftPower));
         maxPower = Math.max(maxPower, Math.abs(frontRightPower));
         maxPower = Math.max(maxPower, Math.abs(backRightPower));
-
-//        if(maxSpeed < 1) {
-//            telemetry.addData("frontLeftPower", frontLeftPower);
-//            telemetry.addData("backLeftPower", backLeftPower);
-//            telemetry.addData("frontRightPower", frontRightPower);
-//            telemetry.addData("backLeftPower", backLeftPower);
-//        }
-
-        telemetry.addData("S_frontLeftPower",  maxSpeed * (frontLeftPower / maxPower));
-        telemetry.addData("S_backLeftPower", maxSpeed * (backLeftPower / maxPower));
-        telemetry.addData("S_frontRightPower",  maxSpeed * (frontRightPower / maxPower));
-        telemetry.addData("S_backLeftPower",  maxSpeed * (backRightPower / maxPower));
-//        }
+        
         frontLeftMotor.setPower(maxSpeed * (frontLeftPower / maxPower));
         backLeftMotor.setPower(maxSpeed * (backLeftPower / maxPower));
         frontRightMotor.setPower(maxSpeed * (frontRightPower / maxPower));
