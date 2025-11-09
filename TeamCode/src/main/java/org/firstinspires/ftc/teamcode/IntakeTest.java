@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name="FlywheelLaunchTest", group="Test")
-class IntakeTest extends LinearOpMode {
+public class IntakeTest extends LinearOpMode {
     private DcMotor intakeLeft = null;
     private DcMotor intakeRight = null;
 
