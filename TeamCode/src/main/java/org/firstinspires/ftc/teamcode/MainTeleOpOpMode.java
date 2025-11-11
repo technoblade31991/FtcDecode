@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTag;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
@@ -13,13 +16,22 @@ public class MainTeleOpOpMode extends LinearOpMode {
 
     private static final boolean DRIVE_ENABLED = true;
     private static final boolean SHOOT_ENABLED = true;
+    private static final boolean CAMERA_ENABLED = true;
+    private DistanceSensor distanceSensor;
+
     @Override
     public void runOpMode() {
         // Initialize hardware
 
         // Initialize aprilTag
         AprilTag aprilTag = new AprilTag();
-        aprilTag.init(hardwareMap);
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "distance_Sensor");
+
+        if (CAMERA_ENABLED) {
+            aprilTag.init(hardwareMap);
+        } else {
+            aprilTag = null;
+        }
 
         MecanumDrive drive;
         // Initialize mecanum drive
@@ -39,8 +51,9 @@ public class MainTeleOpOpMode extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-
-            aprilTag.listen(telemetry, gamepad1, drive);
+            if (CAMERA_ENABLED) {
+                aprilTag.listen(telemetry, gamepad1, drive);
+            }
             if (SHOOT_ENABLED) {
                 shooter.listen(false);
             }
@@ -56,6 +69,21 @@ public class MainTeleOpOpMode extends LinearOpMode {
                 strafe = -gamepad1.right_stick_x;
                 rotate = gamepad1.left_stick_x;
                 drive.driveRelativeRobot(forward, strafe, rotate);
+
+                double distance = distanceSensor.getDistance(DistanceUnit.INCH);
+
+                // 2. Check the distance range using the logical AND operator (&&)
+                if (distance > 24 && distance < 28) {
+                    // Rumbles the controller for 5000ms (5 seconds)
+                    // Note: Consider a shorter rumble or a pattern for better feedback
+                    // gamepad1.rumble(1.0, 1.0, 3000);
+                    telemetry.addData("Status", "TARGET IN RANGE");
+                } else {
+                    telemetry.addData("Status", "Keep driving...");
+                }
+
+                telemetry.addData("Distance (in)", distance);
+                telemetry.update();
             }
 
             telemetry.update();
