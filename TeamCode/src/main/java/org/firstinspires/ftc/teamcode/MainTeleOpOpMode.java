@@ -15,8 +15,8 @@ public class MainTeleOpOpMode extends LinearOpMode {
     double forward, strafe, rotate;
 
     private static final boolean DRIVE_ENABLED = true;
-    private static final boolean SHOOT_ENABLED = false;
-    private static boolean CAMERA_ENABLED = true;
+    private static final boolean SHOOT_ENABLED = true;
+    private static boolean CAMERA_ENABLED = false;
     private DistanceSensor distanceSensor;
 
     @Override
