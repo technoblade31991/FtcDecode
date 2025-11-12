@@ -11,7 +11,6 @@ import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 public class MainAutonomousOpMode extends LinearOpMode {
 
     // Declare motors
-    private DcMotor frontLeft, frontRight, backLeft, backRight;
 
     // Robot constants (update for your specific setup)
     static final double     COUNTS_PER_MOTOR_REV    = 537.7;    // GoBILDA 5202/5203 motor
@@ -22,7 +21,8 @@ public class MainAutonomousOpMode extends LinearOpMode {
                     (WHEEL_DIAMETER_INCHES * Math.PI);
 
     static final double     DRIVE_SPEED             = 0.2;
-    static final double     TARGET_DISTANCE_INCHES  = -9.25; // Move backward 9.25 inches
+    private DcMotor frontLeft, frontRight, backLeft, backRight;
+    double     TARGET_DISTANCE_INCHES  = -9.25; // Move backward 9.25 inches
 
     private static final boolean DRIVE_ENABLED = true;
     private static final boolean SHOOT_ENABLED = true;
@@ -69,7 +69,8 @@ public class MainAutonomousOpMode extends LinearOpMode {
 
                 shooter.launch_n_balls(NUM_BALLS);
             }
-            strafeLeftInches(12, 0.5);
+            encoderDrive(0.5, -5, 5);
+            strafeLeftInches(20, 0.5);
         }
     }
 
