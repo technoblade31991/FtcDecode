@@ -30,15 +30,15 @@ public class PatternAutonomousOpMode extends LinearOpMode {
     @Override
     public void runOpMode() {
         MecanumDrive drive = new MecanumDrive();
-        drive.init(hardwareMap);
+        drive.init(hardwareMap, telemetry);
         telemetry.addLine("Ready to start");
         telemetry.update();
         waitForStart();
 
         while (opModeIsActive()) {
-            drive.driveRelativeRobot(1, 0, 0);
+            drive.driveRelativeRobot(1, 0, 0, 1);
             sleep(2000);
-            drive.driveRelativeRobot(-1, 0, 0);
+            drive.driveRelativeRobot(-1, 0, 0, 1);
             sleep(2000);
         }
     }

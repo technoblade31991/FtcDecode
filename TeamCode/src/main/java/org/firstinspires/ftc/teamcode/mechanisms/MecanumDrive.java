@@ -7,12 +7,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MecanumDrive {
     private DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     private IMU  imu;
-    public void init(HardwareMap hwMap) {
+    private Telemetry telemetry;
+    public void init(HardwareMap hwMap, Telemetry telemetry) {
         frontLeftMotor = hwMap.get(DcMotor.class, "frontLeftMotor");
         frontRightMotor = hwMap.get(DcMotor.class, "frontRightMotor");
         backLeftMotor = hwMap.get(DcMotor.class, "backLeftMotor");
@@ -24,7 +26,7 @@ public class MecanumDrive {
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
+        this.telemetry = telemetry;
         imu =    hwMap.get(IMU.class, "imu");
 
         // Square orientation right angle control hub needed
@@ -36,20 +38,19 @@ public class MecanumDrive {
         imu.initialize(new IMU.Parameters(revOrientation));
     }
 
-    public void driveRelativeRobot(double forward, double strafe, double rotate) {
+    public void driveRelativeRobot(double forward, double strafe, double rotate, double maxSpeed) {
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
         double frontRightPower = forward - strafe - rotate;
         double backRightPower = forward + strafe - rotate;
 
         double maxPower = 1;
-        double maxSpeed = 1;
 
         maxPower = Math.max(maxPower, Math.abs(frontLeftPower));
         maxPower = Math.max(maxPower, Math.abs(backLeftPower));
         maxPower = Math.max(maxPower, Math.abs(frontRightPower));
         maxPower = Math.max(maxPower, Math.abs(backRightPower));
-
+        
         frontLeftMotor.setPower(maxSpeed * (frontLeftPower / maxPower));
         backLeftMotor.setPower(maxSpeed * (backLeftPower / maxPower));
         frontRightMotor.setPower(maxSpeed * (frontRightPower / maxPower));
@@ -65,6 +66,6 @@ public class MecanumDrive {
         double newForward = r * Math.sin(theta);
         double newStrafe = r * Math.cos(theta);
 
-        this.driveRelativeRobot(newForward, newStrafe, rotate);
+        this.driveRelativeRobot(newForward, newStrafe, rotate, 1);
     }
 }
