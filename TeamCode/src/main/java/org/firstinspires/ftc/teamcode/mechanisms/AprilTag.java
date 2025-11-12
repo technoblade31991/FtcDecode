@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
@@ -27,7 +29,10 @@ public class AprilTag {
     public AprilTagPoseFtc pose;
     private AprilTagProcessor aprilTag;
 
-    public void init(HardwareMap hardwareMap) {
+    /*
+    Returns true if initialization was successful, else false.
+    */
+    public boolean init(HardwareMap hardwareMap) {
         boolean targetFound = false;    // Set to true when an AprilTag target is detected
 
         // --- Step 1: Hardware Configuration ---
@@ -35,7 +40,12 @@ public class AprilTag {
         // configuration file.
         // On your Driver Station, go to Configure Robot -> Control Hub -> Webcam
         // and add a webcam with the name "Webcam 1".
-        WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        WebcamName webcamName;
+        try {
+            webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        } catch (Exception e) {
+            return false;
+        }
 
         // --- Step 2: Initialize the AprilTag Processor ---
         // This is the "brains" that will do the AprilTag detection.
@@ -57,6 +67,7 @@ public class AprilTag {
                 // .setCameraResolution(new Size(640, 480)) // Optional
                 // .setStreamFormat(VisionPortal.StreamFormat.YUY2) // Optional
                 .build();
+        return true;
     }
 
     public void listen(Telemetry telemetry, Gamepad gamepad1, MecanumDrive drive) {

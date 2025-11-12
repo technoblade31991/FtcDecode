@@ -15,8 +15,8 @@ public class MainTeleOpOpMode extends LinearOpMode {
     double forward, strafe, rotate;
 
     private static final boolean DRIVE_ENABLED = true;
-    private static final boolean SHOOT_ENABLED = true;
-    private static final boolean CAMERA_ENABLED = true;
+    private static final boolean SHOOT_ENABLED = false;
+    private static boolean CAMERA_ENABLED = true;
     private DistanceSensor distanceSensor;
 
     @Override
@@ -28,10 +28,17 @@ public class MainTeleOpOpMode extends LinearOpMode {
         distanceSensor = hardwareMap.get(DistanceSensor.class, "distance_Sensor");
 
         if (CAMERA_ENABLED) {
-            aprilTag.init(hardwareMap);
+            if (!aprilTag.init(hardwareMap)) {
+                telemetry.addData("AprilTag", "Camera initialization failed!");
+                telemetry.update();
+                aprilTag = null;
+                CAMERA_ENABLED = false;
+            }
         } else {
             aprilTag = null;
         }
+
+
 
         MecanumDrive drive;
         // Initialize mecanum drive
