@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.messages.TankLocalizerInputsMessage;
 
 public class Shooter {
 
@@ -20,26 +21,34 @@ public class Shooter {
         STARTING,
         FEED,
         LAUNCHING,
-        STOPPING,
-
+        STOPPING
     }
 
+    /* Current state of the shooter mechanism */
     private State state = State.OFF;
+    /* Power constants for the launcher and servos. */
+    public static final double LAUNCH_STOP_LAUNCHER_POWER = 0; /* Launcher off power */
+    public static final double LAUNCH_LAUNCHER_POWER = 0.6; /* Launcher running power */
+    public static final double LAUNCHER_TARGET_VELOCITY = 1390; /* Target velocity for launcher */
+    public static final double LAUNCH_STOP_LEFT_FEEDER_POWER = 0; /* Left feeder off power */
+    public static final double LAUNCH_STOP_RIGHT_FEEDER_POWER = 0; /* Right feeder off power */
+    public static final double LAUNCH_LEFT_FEEDER_POWER = 1; /* Left feeder running power */
+    public static final double LAUNCH_RIGHT_FEEDER_POWER = 1; /* Right feeder running power */
 
-    public static double LAUNCH_LAUNCHER_POWER = 0.6;
-    public static double LAUNCH_LAUNCHER_FULL_SPEED_MS = 2_000;
-    public static double LAUNCH_LEFT_FEEDER_POWER = 1;
-    public static double LAUNCH_RIGHT_FEEDER_POWER = 1;
-    public static double LAUNCH_STOP_LEFT_FEEDER_POWER = 0;
-    public static double LAUNCH_STOP_RIGHT_FEEDER_POWER = 0;
-    public static double LAUNCH_STOP_LAUNCHER_POWER = 0;
-    public static double LAUNCH_FEED_MS_RESET = 1_150;
-    public static double LAUNCH_FEED_MS_NO_RESET = 1_150;
-    public static double LAUNCH_LAUNCHER_COMPLETE_MS = 200;
-    private static boolean reset = true;
+    /* Time constants for the launcher and servos. */
+    public static final double LAUNCH_LAUNCHER_FULL_SPEED_MS = 1_500; /* Time for launcher to reach full speed */
+    public static final double LAUNCH_FEED_MS_RESET = 1_150; /* Time it takes for ball to pass through servos when reset is true */
+    public static final double LAUNCH_FEED_MS_NO_RESET = 1_150; /* Time it takes for ball to pass through servos when reset is false.
+                                                           * Note that currently this is equal to LAUNCH_FEED_MS_RESET.
+                                                           */
+    public static final double LAUNCH_LAUNCHER_COMPLETE_MS = 200; /* Time for ball to launch once it is past servos */
+
+    private static final double LAUNCH_LAUNCHER_ENFORCE_MS = 300; /* Time to wait before re-feeding when enforcing continuous launch */
     private double launchFeedMs;
+    private static boolean reset = true;
     private CRServo left_feeder = null;
     private CRServo right_feeder = null;
+
     private DcMotorEx launcher = null;
     private Gamepad gamepad2;
     private Telemetry telemetry;
@@ -77,6 +86,7 @@ public class Shooter {
         assert launcher != null;
         launcher.setZeroPowerBehavior(BRAKE);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        /* Use PIDF coefficients to control launcher velocity */
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(300,0,0,10));
 
         // Initialize launchFeedMs
@@ -84,7 +94,13 @@ public class Shooter {
     }
 
     public boolean isOff() {
-        return state == State.OFF;
+        /* Here we check for STOPPING not OFF, because when we have multiple launches,
+         * we transition from STOPPING to FEED directly.
+         */
+        return state == State.STOPPING;
+    }
+    public boolean isFeeding(){
+        return state == State.FEED;
     }
     public void listen(boolean enforce) {
 
@@ -105,7 +121,7 @@ public class Shooter {
                 }
                 break;
             case STARTING:
-                if (timer.milliseconds() > LAUNCH_LAUNCHER_FULL_SPEED_MS) {
+                if ((launcher.getVelocity() >= LAUNCHER_TARGET_VELOCITY) || (timer.milliseconds() > LAUNCH_LAUNCHER_FULL_SPEED_MS)) {
                     /* Once launcher motor is at full speed,
                      * set the state to FEED, reset the timer and
                      * start the launcher servos.
@@ -118,6 +134,7 @@ public class Shooter {
                 }
                 break;
             case FEED:
+                telemetry.addData("Launch Velocity",launcher.getVelocity());
                 /* When ball is inserted, reset is true
                  * After feeding a reset launch, reset is set to false
                  * When second and third balls are launching, reset is false
@@ -157,13 +174,26 @@ public class Shooter {
                     timer.reset();
                     launcher.setPower(LAUNCH_LAUNCHER_POWER);
                 }
+
                 break;
             case STOPPING:
-                /* Stop all motors and servos and transition to OFF state */
-                left_feeder.setPower(LAUNCH_STOP_LEFT_FEEDER_POWER);
-                right_feeder.setPower(LAUNCH_STOP_RIGHT_FEEDER_POWER);
-                launcher.setPower(LAUNCH_STOP_LAUNCHER_POWER);
-                state = State.OFF;
+                /* In case of continuous launch enforcement, we need to go back to FEED state */
+                if (gamepad2.right_bumper || enforce) {
+                    if ((launcher.getVelocity() >= LAUNCHER_TARGET_VELOCITY) ||(timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS)) {
+                        state = State.FEED;
+                        left_feeder.setPower(LAUNCH_LEFT_FEEDER_POWER);
+                        right_feeder.setPower(LAUNCH_RIGHT_FEEDER_POWER);
+
+                        timer.reset();
+                        break;
+                    }
+                } else {
+                    /* Stop all motors and servos and transition to OFF state */
+                    left_feeder.setPower(LAUNCH_STOP_LEFT_FEEDER_POWER);
+                    right_feeder.setPower(LAUNCH_STOP_RIGHT_FEEDER_POWER);
+                    launcher.setPower(LAUNCH_STOP_LAUNCHER_POWER);
+                    state = State.OFF;
+                }
                 break;
         }
         /* At any point, if the left bumper is pressed,
@@ -174,5 +204,26 @@ public class Shooter {
             return;
         }
         this.telemetry.addData("state", state);
+    }
+    public void launch_n_balls(int n){
+
+        /* Launch n balls in succession */
+        for (int i = 0; i < n; i++) {
+            telemetry.addData("Shooting", "Ball %d", i + 1);
+
+            telemetry.update();
+            listen(true);
+
+            while(!isFeeding()){
+                telemetry.addData("Shooting loop", "Ball %d", i + 1);
+                listen(true);
+                telemetry.update();
+            }
+            while (!isOff()) {
+                telemetry.addData("Shooting loop", "Ball %d", i + 1);
+                listen(true);
+                telemetry.update();
+            }
+        }
     }
 }

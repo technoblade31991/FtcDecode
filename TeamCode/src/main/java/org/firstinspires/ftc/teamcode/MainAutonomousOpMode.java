@@ -22,10 +22,12 @@ public class MainAutonomousOpMode extends LinearOpMode {
                     (WHEEL_DIAMETER_INCHES * Math.PI);
 
     static final double     DRIVE_SPEED             = 0.2;
-    static final double     TARGET_DISTANCE_INCHES  = -10.0; // Move backward 10 inches
+    static final double     TARGET_DISTANCE_INCHES  = -9.25; // Move backward 9.25 inches
 
     private static final boolean DRIVE_ENABLED = true;
     private static final boolean SHOOT_ENABLED = true;
+
+    private static final int NUM_BALLS = 4;
     @Override
     public void runOpMode() {
         Shooter shooter;
@@ -62,16 +64,12 @@ public class MainAutonomousOpMode extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-            if (SHOOT_ENABLED) {
-                for (int i = 0; i < 3; i++) {
-                    shooter.listen(true);
-                    while (!shooter.isOff()) {
-                        shooter.listen(false);
-                    }
-                }
-            }
-
             encoderDrive(DRIVE_SPEED, TARGET_DISTANCE_INCHES, 5.0);
+            if (SHOOT_ENABLED) {
+
+                shooter.launch_n_balls(NUM_BALLS);
+            }
+            strafeLeftInches(12, 0.5);
         }
     }
 
@@ -126,5 +124,51 @@ public class MainAutonomousOpMode extends LinearOpMode {
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+    private void strafeLeftInches(double inches, double power) {
+        int moveCounts = (int) (inches * COUNTS_PER_INCH);
+
+        // Strafing left: set target positions
+        int flTarget = frontLeft.getCurrentPosition() - moveCounts;
+        int frTarget = frontRight.getCurrentPosition() + moveCounts;
+        int blTarget = backLeft.getCurrentPosition() + moveCounts;
+        int brTarget = backRight.getCurrentPosition() - moveCounts;
+
+        frontLeft.setTargetPosition(flTarget);
+        frontRight.setTargetPosition(frTarget);
+        backLeft.setTargetPosition(blTarget);
+        backRight.setTargetPosition(brTarget);
+
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        frontLeft.setPower(power);
+        frontRight.setPower(power);
+        backLeft.setPower(power);
+        backRight.setPower(power);
+
+        while (opModeIsActive() &&
+                (frontLeft.isBusy() && frontRight.isBusy() &&
+                        backLeft.isBusy() && backRight.isBusy())) {
+            telemetry.addData("Strafing Left", "In Progress");
+            telemetry.update();
+        }
+
+        // Stop all motion
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backLeft.setPower(0);
+        backRight.setPower(0);
+
+        // Return to normal encoder mode
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        telemetry.addData("Strafing", "Complete");
+        telemetry.update();
     }
 }
