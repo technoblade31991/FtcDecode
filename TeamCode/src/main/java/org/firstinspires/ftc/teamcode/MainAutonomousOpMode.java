@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+/* this is defined in MainTeleOpOpMode */
 import static org.firstinspires.ftc.teamcode.MainTeleOpOpMode.NEW_ROBOT;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
