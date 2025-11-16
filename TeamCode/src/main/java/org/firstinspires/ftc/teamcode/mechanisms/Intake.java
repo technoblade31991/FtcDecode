@@ -28,7 +28,7 @@ public class Intake {
         if (this.gamepad2.dpad_up) {
             intake_motor.setPower(INTAKE_MOTOR_FULL_POWER);
         } else if (this.gamepad2.dpad_down) {
-            intake_motor.setPower(-INTAKE_MOTOR_STOP_POWER);
+            intake_motor.setPower(INTAKE_MOTOR_STOP_POWER);
         }
     }
 }
