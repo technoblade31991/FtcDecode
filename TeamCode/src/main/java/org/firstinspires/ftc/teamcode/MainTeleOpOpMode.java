@@ -1,7 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -9,23 +13,55 @@ import org.firstinspires.ftc.teamcode.mechanisms.AprilTag;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 
-@TeleOp(name = "MainTeleOpOpModeCombinedAb02")
+@TeleOp(name = "MainTeleOpOpModeCombinedAb11")
 public class MainTeleOpOpMode extends LinearOpMode {
 
     double forward, strafe, rotate, maxSpeed;
 
     private static final boolean DRIVE_ENABLED = true;
-    private static final boolean SHOOT_ENABLED = true;
+    private static final boolean SHOOT_ENABLED = false;
     private static boolean CAMERA_ENABLED = false;
     private DistanceSensor distanceSensor;
+    private DcMotorEx intake_motor = null;
+    private DcMotorEx flywheel_left = null;
+    private DcMotorEx flywheel_right = null;
 
-    @Override
+    public static final double INTAKE_MOTOR_POWER = 1.0;
+
     public void runOpMode() {
         // Initialize hardware
 
         // Initialize aprilTag
         AprilTag aprilTag = new AprilTag();
-        distanceSensor = hardwareMap.get(DistanceSensor.class, "distance_Sensor");
+        try {
+            distanceSensor = hardwareMap.get(DistanceSensor.class, "distance_Sensor");
+
+        } catch (Exception e) {
+
+        }
+
+        // Initialize intake motor
+        try {
+            intake_motor = hardwareMap.get(DcMotorEx.class, "intake_motor");
+        } catch (Exception e) {
+            telemetry.addData("ERROR", "intake_motor not found");
+            telemetry.update();
+        }
+
+        // Initialize flywheel motor
+        try {
+            flywheel_left = hardwareMap.get(DcMotorEx.class, "flywheel_left");
+        } catch (Exception e) {
+            telemetry.addData("ERROR", "flywheel_left motor not found");
+            telemetry.update();
+        }
+
+        try {
+            flywheel_right = hardwareMap.get(DcMotorEx.class, "flywheel_right");
+        } catch (Exception e) {
+            telemetry.addData("ERROR", "flywheel_right not found");
+            telemetry.update();
+        }
 
         if (CAMERA_ENABLED) {
             if (!aprilTag.init(hardwareMap)) {
@@ -37,8 +73,10 @@ public class MainTeleOpOpMode extends LinearOpMode {
         } else {
             aprilTag = null;
         }
-
-
+        flywheel_left.setPower(0.8);
+        flywheel_right.setDirection(DcMotorSimple.Direction.REVERSE);
+        flywheel_right.setPower(0.8);
+     intake_motor.setPower(0);
 
         MecanumDrive drive;
         // Initialize mecanum drive
@@ -88,6 +126,9 @@ public class MainTeleOpOpMode extends LinearOpMode {
                     rotate = gamepad1.left_stick_x;
                     drive.driveRelativeRobot(forward, strafe, rotate, 1);
             }
+
+
+            /*
             double distance = distanceSensor.getDistance(DistanceUnit.INCH);
 
             // 2. Check the distance range using the logical AND operator (&&)
@@ -102,6 +143,8 @@ public class MainTeleOpOpMode extends LinearOpMode {
 
             telemetry.addData("Distance (in)", distance);
             telemetry.update();
+
+             */
         }
     }
 }
