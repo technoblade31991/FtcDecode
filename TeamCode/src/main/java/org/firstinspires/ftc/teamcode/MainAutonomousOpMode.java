@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.MainTeleOpOpMode.NEW_ROBOT;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
@@ -33,7 +34,7 @@ public class MainAutonomousOpMode extends LinearOpMode {
         Shooter shooter;
         if (SHOOT_ENABLED) {
             shooter = new Shooter();
-            shooter.init(hardwareMap, gamepad2, telemetry);
+            shooter.init(hardwareMap, gamepad2, telemetry, false, NEW_ROBOT);
         } else {
             shooter = null;
         }

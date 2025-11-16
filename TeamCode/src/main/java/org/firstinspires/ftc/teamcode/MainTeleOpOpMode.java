@@ -14,89 +14,58 @@ import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 @TeleOp(name = "MainTeleOpOpModeCombinedAb11")
 public class MainTeleOpOpMode extends LinearOpMode {
 
-    public static final double INTAKE_MOTOR_POWER = 1.0;
-    private static final boolean DRIVE_ENABLED = true;
+    private static boolean DRIVE_ENABLED = true;
     private static boolean SHOOT_ENABLED = true;
     private static boolean INTAKE_ENABLED = true;
     private static boolean DISTANCE_ENABLED = true;
     private static boolean CAMERA_ENABLED = false;
-    private DcMotorEx intake_motor = null;
+    public static final boolean NEW_ROBOT = true;
     private DcMotorEx flywheel_left = null;
     private DcMotorEx flywheel_right = null;
 
     @Override
-    public void runOpMode() {
-        /* Initialize hardware */
-
-        /* Initialize aprilTag, distance sensor, and intake only if their respective enabled booleans are true */
+    public void runOpMode() {/* Initialize shooter, drive, aprilTag, intake, and  distance sensor only if their respective enabled booleans are true */
+        Shooter shooter = new Shooter();
+        MecanumDrive drive = new MecanumDrive();
         AprilTag aprilTag = new AprilTag();
         Intake intake = new Intake();
         DistanceSensor distanceSensor = new DistanceSensor();
-        if (CAMERA_ENABLED && !aprilTag.init(hardwareMap, telemetry)) {
+
+
+        if (SHOOT_ENABLED && !shooter.init(hardwareMap, gamepad2, telemetry, true, NEW_ROBOT)) {
+            SHOOT_ENABLED = false;
+        }
+        if (DRIVE_ENABLED && !drive.init(hardwareMap, telemetry, gamepad1)) {
+            DRIVE_ENABLED = false;
+        }
+        if (CAMERA_ENABLED && !aprilTag.init(hardwareMap, telemetry, gamepad1, drive)) {
             CAMERA_ENABLED = false;
+        }
+        if (INTAKE_ENABLED && !intake.init(hardwareMap, telemetry, gamepad2)) {
+            INTAKE_ENABLED = false;
         }
         if (DISTANCE_ENABLED && !distanceSensor.init(hardwareMap, telemetry)) {
             DISTANCE_ENABLED = false;
-        }
-        if (INTAKE_ENABLED && !intake.init(hardwareMap, telemetry)) {
-            INTAKE_ENABLED = false;
-        }
-
-        if (SHOOT_ENABLED) {
-
-            // Initialize flywheel motor
-            try {
-                flywheel_left = hardwareMap.get(DcMotorEx.class, "flywheel_left");
-            } catch (Exception e) {
-                telemetry.addData("ERROR", "flywheel_left motor not found");
-                // TODO: Should we still try to launch if only one flywheel is present?
-                SHOOT_ENABLED = false;
-            }
-
-            try {
-                flywheel_right = hardwareMap.get(DcMotorEx.class, "flywheel_right");
-                flywheel_right.setDirection(DcMotorSimple.Direction.REVERSE);
-            } catch (Exception e) {
-                telemetry.addData("ERROR", "flywheel_right not found");
-                // TODO: Should we still try to launch if only one flywheel is present?
-                SHOOT_ENABLED = false;
-
-            }
-
-        }
-
-        flywheel_left.setPower(0.8);
-        flywheel_right.setPower(0.8);
-        intake_motor.setPower(0);
-
-        MecanumDrive drive;
-        // Initialize mecanum drive
-        if (DRIVE_ENABLED) {
-            drive = new MecanumDrive();
-            drive.init(hardwareMap, telemetry);
-        }
-        Shooter shooter = null;
-        if (SHOOT_ENABLED) {
-            shooter = new Shooter();
-            shooter.init(hardwareMap, gamepad2, telemetry);
         }
 
         telemetry.update();
 
         waitForStart();
         while (opModeIsActive()) {
-            if (CAMERA_ENABLED) {
-                aprilTag.listen(telemetry, gamepad1, drive);
-            }
             if (SHOOT_ENABLED) {
-                assert shooter != null;
-                shooter.listen(false);
+                shooter.listen();
             }
             if (DRIVE_ENABLED) {
-                drive.listen(gamepad1);
+                drive.listen();
+            }
+            if (CAMERA_ENABLED) {
+                aprilTag.listen();
+            }
+            if (INTAKE_ENABLED) {
+                intake.listen();
             }
             if (DISTANCE_ENABLED) {
-                distanceSensor.listen(telemetry);
+                distanceSensor.listen();
             }
             telemetry.update();
         }

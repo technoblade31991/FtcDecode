@@ -27,12 +27,17 @@ public class AprilTag {
 
     public AprilTagPoseFtc pose;
     private AprilTagProcessor aprilTag;
+    Gamepad gamepad1;
+    private MecanumDrive drive;
+    private Telemetry telemetry;
 
     /*
     Returns true if initialization was successful, else false.
     */
-    public boolean init(HardwareMap hardwareMap, Telemetry telemetry) {
-        boolean targetFound = false;    // Set to true when an AprilTag target is detected
+    public boolean init(HardwareMap hardwareMap, Telemetry telemetry, Gamepad gamepad1, MecanumDrive drive) {
+        this.gamepad1 = gamepad1;
+        this.drive=drive;
+        this.telemetry = telemetry;
 
         // --- Step 1: Hardware Configuration ---
         // Every webcam (like your C925) needs to be in your robot's
@@ -59,70 +64,66 @@ public class AprilTag {
         // .setCameraResolution(new Size(640, 480)) // Optional
         // .setStreamFormat(VisionPortal.StreamFormat.YUY2) // Optional
         // 1. Declare your VisionPortal and AprilTagProcessor variables
+        // Vision portal shows up as unused but is necessary for the camera to function.
         VisionPortal visionPortal = new VisionPortal.Builder().setCamera(webcamName).build();
         return true;
     }
     
-    class LoopResult {
+    static class LoopResult {
         boolean targetFound;
         AprilTagDetection desiredTag;
+        LoopResult(boolean targetFound, AprilTagDetection desiredTag) {
+            this.targetFound = targetFound;
+            this.desiredTag = desiredTag;
+        }
     }
 
     private LoopResult loop_through_tags(Telemetry telemetry, List<AprilTagDetection> currentDetections) {
-        boolean targetFound = false;
         for (AprilTagDetection detection : currentDetections) {
             if (detection.metadata == null) {
                 telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
                 continue; // Skip to next detection
             }
-            if (!(DESIRED_TAG_ID < 0 || detection.id == DESIRED_TAG_ID)) {
+            if (DESIRED_TAG_ID >= 0 && detection.id != DESIRED_TAG_ID) {
                 telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
                 continue; // Skip to next detection
             }
             // If checks pass, target is found
-            targetFound = true;
-            break; // Exit loop early
+            return new LoopResult(true, detection);
         }
-        return new LoopResult() {{
-            this.targetFound = targetFound;
-            this.desiredTag = desiredTag;
-        }};
+        return new LoopResult(false, null);
     }
 
 
-    public void listen(Telemetry telemetry, Gamepad gamepad1, MecanumDrive drive) {
-        boolean targetFound = false;
-        AprilTagDetection desiredTag = null;
+    public void listen() {
         // Get a list of all AprilTags that are currently visible
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-        telemetry.addData("# AprilTags Detected", currentDetections.size());
+        this.telemetry.addData("# AprilTags Detected", currentDetections.size());
 
         if (currentDetections.isEmpty()) {
-            telemetry.addLine("No AprilTags visible.");
+            this.telemetry.addLine("No AprilTags visible.");
         } else {
             telemetry.addLine("---");
         }
 
         // Loop through all visible tags
         LoopResult result = loop_through_tags(telemetry, currentDetections);
-        targetFound = result.targetFound;
-        desiredTag = result.desiredTag;
 
-        if (targetFound) {
+        if (result.targetFound) {
             telemetry.addData("\n>", "HOLD A to Drive to Target\n");
-            telemetry.addData("Found", "ID %d (%s)", desiredTag.id, desiredTag.metadata.name);
-            telemetry.addData("Range", "%5.1f inches", desiredTag.ftcPose.range);
-            telemetry.addData("Bearing", "%3.0f degrees", desiredTag.ftcPose.bearing);
-            telemetry.addData("Yaw", "%3.0f degrees", desiredTag.ftcPose.yaw);
+            telemetry.addData("Found", "ID %d (%s)", result.desiredTag.id, result.desiredTag.metadata.name);
+            telemetry.addData("Range", "%5.1f inches", result.desiredTag.ftcPose.range);
+            telemetry.addData("Bearing", "%3.0f degrees", result.desiredTag.ftcPose.bearing);
+            telemetry.addData("Yaw", "%3.0f degrees", result.desiredTag.ftcPose.yaw);
         } else {
             telemetry.addData("\n>", "Drive using joysticks to find valid target\n");
         }
-        if (gamepad1.a && targetFound) {
+        if (gamepad1.a && result.targetFound) {
 
             // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
-            double rangeError = (DESIRED_DISTANCE - desiredTag.ftcPose.range);
-            double headingError = -desiredTag.ftcPose.bearing;
-            double yawError = desiredTag.ftcPose.yaw;
+            double rangeError = (DESIRED_DISTANCE - result.desiredTag.ftcPose.range);
+            double headingError = -result.desiredTag.ftcPose.bearing;
+            double yawError = result.desiredTag.ftcPose.yaw;
 
             // Use the speed and turn "gains" to calculate how we want the robot to move.
             double forward = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);

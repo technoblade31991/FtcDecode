@@ -8,6 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class DistanceSensor {
     private com.qualcomm.robotcore.hardware.DistanceSensor distanceSensor;
     private static final String deviceName = "distance_Sensor";
+    private Telemetry telemetry;
     /*
     Returns true if initialization was successful, else false.
     */
@@ -15,15 +16,15 @@ public class DistanceSensor {
     public boolean init(HardwareMap hardwareMap, Telemetry telemetry) {
         try {
             distanceSensor = hardwareMap.get(com.qualcomm.robotcore.hardware.DistanceSensor.class, deviceName);
-
         } catch (Exception e) {
             telemetry.addData("ERROR", "distance_Sensor not found");
             return false;
         }
+        this.telemetry = telemetry;
         return true;
     }
 
-    public void listen(Telemetry telemetry) {
+    public void listen() {
         double distance = distanceSensor.getDistance(DistanceUnit.INCH);
 
         // 2. Check the distance range using the logical AND operator (&&)
@@ -31,11 +32,11 @@ public class DistanceSensor {
             // Rumbles the controller for 5000ms (5 seconds)
             // Note: Consider a shorter rumble or a pattern for better feedback
             // gamepad1.rumble(1.0, 1.0, 3000);
-            telemetry.addData("Status", "TARGET IN RANGE");
+            this.telemetry.addData("Status", "TARGET IN RANGE");
         } else {
-            telemetry.addData("Status", "Keep driving...");
+            this.telemetry.addData("Status", "Keep driving...");
         }
 
-        telemetry.addData("Distance (in)", distance);
+        this.telemetry.addData("Distance (in)", distance);
     }
 }
