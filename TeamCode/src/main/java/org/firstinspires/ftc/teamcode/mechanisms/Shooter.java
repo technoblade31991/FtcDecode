@@ -90,10 +90,6 @@ public class Shooter {
                 return false;
             }
         }
-        launcher.setZeroPowerBehavior(BRAKE);
-        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        /* Use PIDF coefficients to control launcher velocity */
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(300,0,0,10));
         return true;
     }
 
@@ -114,6 +110,11 @@ public class Shooter {
         }
         this.leftLauncher.setZeroPowerBehavior(BRAKE);
         this.rightLauncher.setZeroPowerBehavior(BRAKE);
+        leftLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        /* Use PIDF coefficients to control launcher velocity */
+        leftLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(300,0,0,10));
+        rightLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(300,0,0,10));
         this.launcher = null;
         return true;
     }
@@ -126,6 +127,9 @@ public class Shooter {
             return false;
         }
         this.launcher.setZeroPowerBehavior(BRAKE);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        /* Use PIDF coefficients to control launcher velocity */
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(300,0,0,10));
         this.leftLauncher = null;
         this.rightLauncher = null;
         return true;
