@@ -13,7 +13,7 @@ public class MecanumRobotOrientatedOpMode extends OpMode {
     MecanumDrive drive = new MecanumDrive();
     @Override
     public void init() {
-        drive.init(hardwareMap, telemetry);
+        drive.init(hardwareMap, telemetry, gamepad1);
     }
 
     @Override

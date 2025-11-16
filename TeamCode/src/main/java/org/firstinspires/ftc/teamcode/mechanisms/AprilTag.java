@@ -27,7 +27,7 @@ public class AprilTag {
 
     public AprilTagPoseFtc pose;
     private AprilTagProcessor aprilTag;
-    Gamepad gamepad1;
+    private Gamepad gamepad1;
     private MecanumDrive drive;
     private Telemetry telemetry;
 
