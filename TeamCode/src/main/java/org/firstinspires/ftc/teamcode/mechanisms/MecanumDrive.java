@@ -14,6 +14,7 @@ public class MecanumDrive {
     private DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     private IMU  imu;
     private Gamepad gamepad1;
+    private Telemetry telemetry;
 
     public boolean init(HardwareMap hwMap, Telemetry telemetry, Gamepad gamepad1) {
         try {
@@ -36,6 +37,7 @@ public class MecanumDrive {
         } catch (Exception e) {
             telemetry.addData("ERROR", "backRightMotor not initialized");
         }
+        this.telemetry = telemetry;
 
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -70,6 +72,9 @@ public class MecanumDrive {
         double maxSpeed = 1;
         if (this.gamepad1.left_trigger > 0.5) {
             maxSpeed = 0.25;
+            this.telemetry.addData("Mode", "Park Assist");
+        } else {
+            this.telemetry.addData("Mode", "Normal");
         }
 
         double forward = this.gamepad1.right_stick_y;
