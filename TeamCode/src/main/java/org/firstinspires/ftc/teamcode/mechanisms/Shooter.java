@@ -157,7 +157,7 @@ public class Shooter {
     public void listen() {
         switch (state) {
             case OFF:
-                if (gamepad2.right_bumper||!this.autonomous) {
+                if (gamepad2.right_bumper||this.autonomous) {
                     /*
                      * Right bumper was pressed.
                      * Launching ball.
