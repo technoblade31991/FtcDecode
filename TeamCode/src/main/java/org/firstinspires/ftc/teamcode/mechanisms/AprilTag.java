@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
@@ -25,6 +23,7 @@ public class AprilTag {
     private static final double MAX_AUTO_STRAFE = 0.5;   //  Clip the strafing speed to this max value (adjust for your robot)
     private static final double MAX_AUTO_TURN = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
     private static final double TURN_SPEED_FIND_TAG = 0.2;   //  Turn at this speed when searching for a tag.
+
 
     public AprilTagPoseFtc pose;
     private AprilTagProcessor aprilTag;
@@ -50,9 +49,7 @@ public class AprilTag {
         // --- Step 2: Initialize the AprilTag Processor ---
         // This is the "brains" that will do the AprilTag detection.
         // We use .Builder() to create a new processor.
-        aprilTag = new AprilTagProcessor.Builder()
-                .setLensIntrinsics(636.967, 636.967, 319.933, 251.434)
-                .build();
+        aprilTag = new AprilTagProcessor.Builder().setLensIntrinsics(636.967, 636.967, 319.933, 251.434).build();
 
         // --- Step 3: Initialize the VisionPortal ---
         // This is the "eyes" that connects the camera to the processor.
@@ -61,13 +58,42 @@ public class AprilTag {
         // .setCameraResolution(new Size(640, 480)) // Optional
         // .setStreamFormat(VisionPortal.StreamFormat.YUY2) // Optional
         // 1. Declare your VisionPortal and AprilTagProcessor variables
-        VisionPortal visionPortal = new VisionPortal.Builder()
-                .setCamera(webcamName)          // Tell it to use your C925 ("Webcam 1")
+        VisionPortal visionPortal = new VisionPortal.Builder().setCamera(webcamName)          // Tell it to use your C925 ("Webcam 1")
                 .addProcessor(aprilTag)         // Tell it to use the AprilTag processor
                 // .setCameraResolution(new Size(640, 480)) // Optional
                 // .setStreamFormat(VisionPortal.StreamFormat.YUY2) // Optional
                 .build();
         return true;
+    }
+    
+    class LoopResult {
+        boolean targetFound;
+        AprilTagDetection desiredTag;
+    }
+    
+    private LoopResult loop_through_tags(Telemetry telemetry, List<AprilTagDetection> currentDetections) {
+        boolean targetFound = false;
+        for (AprilTagDetection detection : currentDetections) {
+            // Look to see if we have size info on this tag.
+            if (detection.metadata == null) {
+                // This tag is NOT in the library, so we don't have enough information to track to it.
+                telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
+            } else {
+                // Check to see if we want to track towards this tag.
+                if (!((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID))) {
+                    // This tag is in the library, but we do not want to track it right now.
+                    telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
+                } else {
+                    // Yes, we want to use this tag.
+                    targetFound = true;
+                    break;  // don't look any further.
+                }
+            }
+        }
+        return new LoopResult(){{
+            this.targetFound = targetFound;
+            this.desiredTag = desiredTag;
+        }};
     }
 
     public void listen(Telemetry telemetry, Gamepad gamepad1, MecanumDrive drive) {
@@ -84,24 +110,10 @@ public class AprilTag {
         }
 
         // Loop through all visible tags
-         for (AprilTagDetection detection : currentDetections) {
-                        // Look to see if we have size info on this tag.
-                        if (detection.metadata != null) {
-                            //  Check to see if we want to track towards this tag.
-                            if ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID)) {
-                                // Yes, we want to use this tag.
-                                targetFound = true;
-                                desiredTag = detection;
-                                break;  // don't look any further.
-                            } else {
-                                // This tag is in the library, but we do not want to track it right now.
-                                telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
-                            }
-                        } else {
-                            // This tag is NOT in the library, so we don't have enough information to track to it.
-                            telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
-                        }
-                    }
+        LoopResult result = loop_through_tags(telemetry, currentDetections);
+        targetFound = result.targetFound;
+        desiredTag = result.desiredTag;
+
         if (targetFound) {
             telemetry.addData("\n>", "HOLD A to Drive to Target\n");
             telemetry.addData("Found", "ID %d (%s)", desiredTag.id, desiredTag.metadata.name);

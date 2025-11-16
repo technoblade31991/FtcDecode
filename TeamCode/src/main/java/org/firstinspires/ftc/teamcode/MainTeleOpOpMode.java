@@ -19,7 +19,6 @@ public class MainTeleOpOpMode extends LinearOpMode {
     private static boolean INTAKE_ENABLED = true;
     private static boolean DISTANCE_ENABLED = true;
     private static boolean CAMERA_ENABLED = false;
-    double forward, strafe, rotate, maxSpeed;
     private DcMotorEx intake_motor = null;
     private DcMotorEx flywheel_left = null;
     private DcMotorEx flywheel_right = null;
@@ -101,30 +100,9 @@ public class MainTeleOpOpMode extends LinearOpMode {
                 assert shooter != null;
                 shooter.listen(false);
             }
-            /* Mecanum drive control
-             * Left stick Y axis = forward/backward
-             * Left stick X axis = strafe left/right
-             * Right stick X axis = rotate clockwise/counterclockwise
-             * Drive relative to the field (not the robot) when right trigger is pressed
-             * If button is pressed And DRIVE_ENABLED
-            new mode call the driveRelativeRobot with maxSpeed = 0.5
-            else call regular mode
-             */
-            /* Park assist mode when left trigger is pressed */
-            maxSpeed = 1;
-            if (gamepad1.left_trigger > 0.5) {
-                maxSpeed = 0.25;
-            }
             if (DRIVE_ENABLED) {
-                forward = gamepad1.right_stick_y;
-                // Strafe is reversed due to weird issues
-                strafe = -gamepad1.right_stick_x;
-                rotate = gamepad1.left_stick_x;
-                // TODO: Just hand over gamepad1 to the drive class?
-                drive.driveRelativeRobot(forward, strafe, rotate, maxSpeed);
+                drive.listen(gamepad1);
             }
-
-
             if (DISTANCE_ENABLED) {
                 distanceSensor.listen(telemetry);
             }
