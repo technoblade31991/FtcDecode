@@ -28,7 +28,7 @@ public class MainTeleOpOpMode extends LinearOpMode {
         DistanceSensor distanceSensor = new DistanceSensor();
 
 
-        if (SHOOT_ENABLED && !shooter.init(hardwareMap, gamepad2, telemetry, true, NEW_ROBOT)) {
+        if (SHOOT_ENABLED && !shooter.init(hardwareMap, gamepad2, telemetry, false, NEW_ROBOT)) {
             SHOOT_ENABLED = false;
         }
         if (DRIVE_ENABLED && !drive.init(hardwareMap, telemetry, gamepad1)) {

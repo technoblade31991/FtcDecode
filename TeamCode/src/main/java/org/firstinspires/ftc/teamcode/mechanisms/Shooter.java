@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Shooter {
 
-    private boolean enforce;
+    private boolean autonomous;
     private boolean newRobot;
     private DcMotorEx leftLauncher;
     private DcMotorEx rightLauncher;
@@ -57,11 +57,11 @@ public class Shooter {
      * Returns true if initialization was successful, else false.
      * newRobot indicates whether this is a new robot configuration, the one with two flywheels.
      */
-    public boolean init(HardwareMap hardwareMap, Gamepad gamepad2, Telemetry telemetry, boolean teleOp, boolean newRobot) {
+    public boolean init(HardwareMap hardwareMap, Gamepad gamepad2, Telemetry telemetry, boolean autonomous, boolean newRobot) {
         // Add gamepad2 to self
         this.gamepad2 = gamepad2;
         this.telemetry = telemetry;
-        this.enforce = teleOp;
+        this.autonomous = autonomous;
         this.newRobot = newRobot;
         // Initialize left feeder servo and set to reverse direction
         try {
@@ -150,7 +150,7 @@ public class Shooter {
     public void listen() {
         switch (state) {
             case OFF:
-                if (gamepad2.right_bumper||!this.enforce) {
+                if (gamepad2.right_bumper||!this.autonomous) {
                     /*
                      * Right bumper was pressed.
                      * Launching ball.
@@ -204,7 +204,7 @@ public class Shooter {
                 break;
             case STOPPING:
                 /* In case of continuous launch enforcement, we need to go back to FEED state */
-                if (gamepad2.right_bumper || enforce) {
+                if (gamepad2.right_bumper || autonomous) {
                     if ((launcher.getVelocity() >= LAUNCHER_TARGET_VELOCITY) ||(timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS)) {
                         state = State.FEED;
                         left_feeder.setPower(LAUNCH_LEFT_FEEDER_POWER);

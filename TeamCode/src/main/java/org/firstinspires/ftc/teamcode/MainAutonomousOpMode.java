@@ -26,7 +26,6 @@ public class MainAutonomousOpMode extends LinearOpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     double     TARGET_DISTANCE_INCHES  = -9.25; // Move backward 9.25 inches
 
-    private static final boolean DRIVE_ENABLED = true;
     private static final boolean SHOOT_ENABLED = true;
 
     private static final int NUM_BALLS = 4;
@@ -35,7 +34,7 @@ public class MainAutonomousOpMode extends LinearOpMode {
         Shooter shooter;
         if (SHOOT_ENABLED) {
             shooter = new Shooter();
-            shooter.init(hardwareMap, gamepad2, telemetry, false, NEW_ROBOT);
+            shooter.init(hardwareMap, gamepad2, telemetry, true, NEW_ROBOT);
         } else {
             shooter = null;
         }
