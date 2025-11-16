@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTag;
 import org.firstinspires.ftc.teamcode.mechanisms.DistanceSensor;
@@ -20,8 +18,6 @@ public class MainTeleOpOpMode extends LinearOpMode {
     private static boolean DISTANCE_ENABLED = true;
     private static boolean CAMERA_ENABLED = false;
     public static final boolean NEW_ROBOT = true;
-    private DcMotorEx flywheel_left = null;
-    private DcMotorEx flywheel_right = null;
 
     @Override
     public void runOpMode() {/* Initialize shooter, drive, aprilTag, intake, and  distance sensor only if their respective enabled booleans are true */
