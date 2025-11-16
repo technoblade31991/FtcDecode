@@ -58,11 +58,7 @@ public class AprilTag {
         // .setCameraResolution(new Size(640, 480)) // Optional
         // .setStreamFormat(VisionPortal.StreamFormat.YUY2) // Optional
         // 1. Declare your VisionPortal and AprilTagProcessor variables
-        VisionPortal visionPortal = new VisionPortal.Builder().setCamera(webcamName)          // Tell it to use your C925 ("Webcam 1")
-                .addProcessor(aprilTag)         // Tell it to use the AprilTag processor
-                // .setCameraResolution(new Size(640, 480)) // Optional
-                // .setStreamFormat(VisionPortal.StreamFormat.YUY2) // Optional
-                .build();
+        VisionPortal visionPortal = new VisionPortal.Builder().setCamera(webcamName).build();
         return true;
     }
     
@@ -70,31 +66,28 @@ public class AprilTag {
         boolean targetFound;
         AprilTagDetection desiredTag;
     }
-    
+
     private LoopResult loop_through_tags(Telemetry telemetry, List<AprilTagDetection> currentDetections) {
         boolean targetFound = false;
         for (AprilTagDetection detection : currentDetections) {
-            // Look to see if we have size info on this tag.
             if (detection.metadata == null) {
-                // This tag is NOT in the library, so we don't have enough information to track to it.
                 telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
-            } else {
-                // Check to see if we want to track towards this tag.
-                if (!((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID))) {
-                    // This tag is in the library, but we do not want to track it right now.
-                    telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
-                } else {
-                    // Yes, we want to use this tag.
-                    targetFound = true;
-                    break;  // don't look any further.
-                }
+                continue; // Skip to next detection
             }
+            if (!(DESIRED_TAG_ID < 0 || detection.id == DESIRED_TAG_ID)) {
+                telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
+                continue; // Skip to next detection
+            }
+            // If checks pass, target is found
+            targetFound = true;
+            break; // Exit loop early
         }
-        return new LoopResult(){{
+        return new LoopResult() {{
             this.targetFound = targetFound;
             this.desiredTag = desiredTag;
         }};
     }
+
 
     public void listen(Telemetry telemetry, Gamepad gamepad1, MecanumDrive drive) {
         boolean targetFound = false;
