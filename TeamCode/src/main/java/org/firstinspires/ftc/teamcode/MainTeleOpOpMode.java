@@ -4,10 +4,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTag;
+import org.firstinspires.ftc.teamcode.mechanisms.DistanceSensor;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 
@@ -21,7 +20,6 @@ public class MainTeleOpOpMode extends LinearOpMode {
     private static boolean DISTANCE_ENABLED = true;
     private static boolean CAMERA_ENABLED = false;
     double forward, strafe, rotate, maxSpeed;
-    private DistanceSensor distanceSensor;
     private DcMotorEx intake_motor = null;
     private DcMotorEx flywheel_left = null;
     private DcMotorEx flywheel_right = null;
@@ -32,12 +30,10 @@ public class MainTeleOpOpMode extends LinearOpMode {
 
         // Initialize aprilTag
         AprilTag aprilTag = new AprilTag();
-        try {
-            distanceSensor = hardwareMap.get(DistanceSensor.class, "distance_Sensor");
 
-        } catch (Exception e) {
-            telemetry.addData("ERROR", "distance_Sensor not found");
-            telemetry.update();
+        /* Initialize distance sensor only if DISTANCE_ENABLED is true */
+        DistanceSensor distanceSensor = new DistanceSensor();
+        if (DISTANCE_ENABLED && !distanceSensor.init(hardwareMap, telemetry)) {
             DISTANCE_ENABLED = false;
         }
 
@@ -114,38 +110,25 @@ public class MainTeleOpOpMode extends LinearOpMode {
             new mode call the driveRelativeRobot with maxSpeed = 0.5
             else call regular mode
              */
-
-            if (gamepad1.left_trigger > 0.5 && DRIVE_ENABLED) {
-                forward = gamepad1.right_stick_y;
-                strafe = -gamepad1.right_stick_x;
-                rotate = gamepad1.left_stick_x;
-
-                drive.driveRelativeRobot(forward, strafe, rotate, 0.25);
-            } else if (DRIVE_ENABLED) {
+            /* Park assist mode when left trigger is pressed */
+            maxSpeed = 1;
+            if (gamepad1.left_trigger > 0.5) {
+                maxSpeed = 0.25;
+            }
+            if (DRIVE_ENABLED) {
                 forward = gamepad1.right_stick_y;
                 // Strafe is reversed due to weird issues
                 strafe = -gamepad1.right_stick_x;
                 rotate = gamepad1.left_stick_x;
-                drive.driveRelativeRobot(forward, strafe, rotate, 1);
+                // TODO: Just hand over gamepad1 to the drive class?
+                drive.driveRelativeRobot(forward, strafe, rotate, maxSpeed);
             }
 
 
             if (DISTANCE_ENABLED) {
-                double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-
-                // 2. Check the distance range using the logical AND operator (&&)
-                if (distance > 24 && distance < 28) {
-                    // Rumbles the controller for 5000ms (5 seconds)
-                    // Note: Consider a shorter rumble or a pattern for better feedback
-                    // gamepad1.rumble(1.0, 1.0, 3000);
-                    telemetry.addData("Status", "TARGET IN RANGE");
-                } else {
-                    telemetry.addData("Status", "Keep driving...");
-                }
-
-                telemetry.addData("Distance (in)", distance);
-                telemetry.update();
+                distanceSensor.listen(telemetry);
             }
+            telemetry.update();
         }
     }
 }
