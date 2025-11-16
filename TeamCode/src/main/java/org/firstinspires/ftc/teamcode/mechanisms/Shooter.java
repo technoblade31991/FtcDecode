@@ -82,31 +82,23 @@ public class Shooter {
 
         // Initialize launcher motor(s)
         if (newRobot) {
-            if (!init_new_robot_launcher(hardwareMap)) {
-                return false;
-            }
+            return init_new_robot_launcher(hardwareMap);
         } else {
-            if (!init_old_robot_launcher(hardwareMap)) {
-                return false;
-            }
+            return init_old_robot_launcher(hardwareMap);
         }
-        return true;
     }
 
     private boolean init_new_robot_launcher(HardwareMap hardwareMap) {
-        // TODO: Should we still try to launch if only one flywheel is present?
         try {
             this.leftLauncher = hardwareMap.get(DcMotorEx.class, "flywheel_left");
         } catch (Exception e) {
             telemetry.addData("ERROR", "flywheel_left not found");
-            return false;
         }
         try {
             this.rightLauncher = hardwareMap.get(DcMotorEx.class, "flywheel_right");
             this.rightLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
         } catch (Exception e) {
             telemetry.addData("ERROR", "flywheel_right not found");
-            return false;
         }
         this.leftLauncher.setZeroPowerBehavior(BRAKE);
         this.rightLauncher.setZeroPowerBehavior(BRAKE);
@@ -151,6 +143,14 @@ public class Shooter {
         }
     }
 
+    private double getVelocity(){
+        if (this.newRobot) {
+            return launcher.getVelocity();
+        } else {
+            return (leftLauncher.getVelocity() + rightLauncher.getVelocity()) / 2.0;
+        }
+    }
+
     public boolean isFeeding(){
         return state == State.FEED;
     }
@@ -172,7 +172,7 @@ public class Shooter {
                 }
                 break;
             case STARTING:
-                if ((launcher.getVelocity() >= LAUNCHER_TARGET_VELOCITY) || (timer.milliseconds() > LAUNCH_LAUNCHER_FULL_SPEED_MS)) {
+                if ((this.getVelocity() >= LAUNCHER_TARGET_VELOCITY) || (timer.milliseconds() > LAUNCH_LAUNCHER_FULL_SPEED_MS)) {
                     /* Once launcher motor is at full speed,
                      * set the state to FEED, reset the timer and
                      * start the launcher servos.
@@ -185,7 +185,7 @@ public class Shooter {
                 }
                 break;
             case FEED:
-                telemetry.addData("Launch Velocity",launcher.getVelocity());
+                telemetry.addData("Launch Velocity",this.getVelocity());
                 if (timer.milliseconds() > LAUNCH_FEED_MS) {
                     /* Once feed time is complete,transition to LAUNCHING state,
                      * start the timer and
@@ -212,7 +212,7 @@ public class Shooter {
             case STOPPING:
                 /* In case of continuous launch enforcement, we need to go back to FEED state */
                 if (gamepad2.right_bumper || autonomous) {
-                    if ((launcher.getVelocity() >= LAUNCHER_TARGET_VELOCITY) ||(timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS)) {
+                    if ((this.getVelocity() >= LAUNCHER_TARGET_VELOCITY) ||(timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS)) {
                         state = State.FEED;
                         left_feeder.setPower(LAUNCH_LEFT_FEEDER_POWER);
                         right_feeder.setPower(LAUNCH_RIGHT_FEEDER_POWER);

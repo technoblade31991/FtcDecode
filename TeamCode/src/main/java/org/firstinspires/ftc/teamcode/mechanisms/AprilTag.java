@@ -22,7 +22,6 @@ public class AprilTag {
     private static final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
     private static final double MAX_AUTO_STRAFE = 0.5;   //  Clip the strafing speed to this max value (adjust for your robot)
     private static final double MAX_AUTO_TURN = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
-    private static final double TURN_SPEED_FIND_TAG = 0.2;   //  Turn at this speed when searching for a tag.
 
 
     public AprilTagPoseFtc pose;

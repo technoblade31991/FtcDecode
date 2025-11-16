@@ -20,25 +20,21 @@ public class MecanumDrive {
             frontLeftMotor = hwMap.get(DcMotor.class, "frontLeftMotor");
         } catch (Exception e) {
             telemetry.addData("ERROR", "frontLeftMotor not initialized");
-            return false;
         }
         try {
             frontRightMotor = hwMap.get(DcMotor.class, "frontRightMotor");
         } catch (Exception e) {
             telemetry.addData("ERROR", "frontRightMotor not initialized");
-            return false;
         }
         try {
             backLeftMotor = hwMap.get(DcMotor.class, "backLeftMotor");
         } catch (Exception e) {
             telemetry.addData("ERROR", "backLeftMotor not initialized");
-            return false;
         }
         try {
             backRightMotor = hwMap.get(DcMotor.class, "backRightMotor");
         } catch (Exception e) {
             telemetry.addData("ERROR", "backRightMotor not initialized");
-            return false;
         }
 
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
