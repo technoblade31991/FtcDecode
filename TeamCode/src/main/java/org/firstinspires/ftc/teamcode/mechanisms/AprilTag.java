@@ -44,7 +44,6 @@ public class AprilTag {
             webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         } catch (Exception e) {
             telemetry.addData("AprilTag", "Camera initialization failed!");
-            telemetry.update();
             return false;
         }
 

@@ -18,7 +18,6 @@ public class DistanceSensor {
 
         } catch (Exception e) {
             telemetry.addData("ERROR", "distance_Sensor not found");
-            telemetry.update();
             return false;
         }
         return true;

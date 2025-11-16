@@ -57,10 +57,10 @@ public class MecanumDrive {
             maxSpeed = 0.25;
         }
 
-        forward = gamepad1.right_stick_y;
+        double forward = gamepad1.right_stick_y;
         // Strafe is reversed due to weird issues
-        strafe = -gamepad1.right_stick_x;
-        rotate = gamepad1.left_stick_x;
+        double strafe = -gamepad1.right_stick_x;
+        double rotate = gamepad1.left_stick_x;
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
         double frontRightPower = forward - strafe - rotate;
@@ -72,22 +72,11 @@ public class MecanumDrive {
         maxPower = Math.max(maxPower, Math.abs(backLeftPower));
         maxPower = Math.max(maxPower, Math.abs(frontRightPower));
         maxPower = Math.max(maxPower, Math.abs(backRightPower));
-        
+
         frontLeftMotor.setPower(maxSpeed * (frontLeftPower / maxPower));
         backLeftMotor.setPower(maxSpeed * (backLeftPower / maxPower));
         frontRightMotor.setPower(maxSpeed * (frontRightPower / maxPower));
         backRightMotor.setPower(maxSpeed * (backRightPower / maxPower));
 
-    }
-
-    public void driveRelativeField(double forward, double strafe, double rotate) {
-        double theta = Math.atan2(forward, strafe);
-        double r = Math.hypot(strafe, forward);
-        theta = AngleUnit.normalizeRadians(theta - imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
-
-        double newForward = r * Math.sin(theta);
-        double newStrafe = r * Math.cos(theta);
-
-        this.driveRelativeRobot(newForward, newStrafe, rotate, 1);
     }
 }

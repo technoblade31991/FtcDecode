@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTag;
 import org.firstinspires.ftc.teamcode.mechanisms.DistanceSensor;
+import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 
@@ -27,24 +28,17 @@ public class MainTeleOpOpMode extends LinearOpMode {
     public void runOpMode() {
         /* Initialize hardware */
 
-        /* Initialize aprilTag only if CAMERA_ENABLED is true */
+        /* Initialize aprilTag, distance sensor, and intake only if their respective enabled booleans are true */
         AprilTag aprilTag = new AprilTag();
+        Intake intake = new Intake();
+        DistanceSensor distanceSensor = new DistanceSensor();
         if (CAMERA_ENABLED && !aprilTag.init(hardwareMap, telemetry)) {
             CAMERA_ENABLED = false;
         }
-
-        /* Initialize distance sensor only if DISTANCE_ENABLED is true */
-        DistanceSensor distanceSensor = new DistanceSensor();
         if (DISTANCE_ENABLED && !distanceSensor.init(hardwareMap, telemetry)) {
             DISTANCE_ENABLED = false;
         }
-
-        // Initialize intake motor
-        try {
-            intake_motor = hardwareMap.get(DcMotorEx.class, "intake_motor");
-        } catch (Exception e) {
-            telemetry.addData("ERROR", "intake_motor not found");
-            telemetry.update();
+        if (INTAKE_ENABLED && !intake.init(hardwareMap, telemetry)) {
             INTAKE_ENABLED = false;
         }
 
@@ -55,7 +49,6 @@ public class MainTeleOpOpMode extends LinearOpMode {
                 flywheel_left = hardwareMap.get(DcMotorEx.class, "flywheel_left");
             } catch (Exception e) {
                 telemetry.addData("ERROR", "flywheel_left motor not found");
-                telemetry.update();
                 // TODO: Should we still try to launch if only one flywheel is present?
                 SHOOT_ENABLED = false;
             }
@@ -65,7 +58,6 @@ public class MainTeleOpOpMode extends LinearOpMode {
                 flywheel_right.setDirection(DcMotorSimple.Direction.REVERSE);
             } catch (Exception e) {
                 telemetry.addData("ERROR", "flywheel_right not found");
-                telemetry.update();
                 // TODO: Should we still try to launch if only one flywheel is present?
                 SHOOT_ENABLED = false;
 
@@ -88,6 +80,8 @@ public class MainTeleOpOpMode extends LinearOpMode {
             shooter = new Shooter();
             shooter.init(hardwareMap, gamepad2, telemetry);
         }
+
+        telemetry.update();
 
         waitForStart();
         while (opModeIsActive()) {
