@@ -11,6 +11,7 @@ public class Intake {
     public static final double INTAKE_MOTOR_FULL_POWER = 1;
     public static final double INTAKE_MOTOR_STOP_POWER = 0;
     private Gamepad gamepad2;
+    private Telemetry telemetry;
 
     public boolean init(HardwareMap hardwareMap, Telemetry telemetry, Gamepad gamepad2) {
         try {
@@ -20,12 +21,15 @@ public class Intake {
             return false;
         }
         this.gamepad2 = gamepad2;
+        this.telemetry = telemetry;
         return true;
     }
 
     public void listen() {
         if (this.gamepad2.dpad_up) {
+            this.telemetry.addData("Intake", "Starting");
             intake_motor.setPower(INTAKE_MOTOR_FULL_POWER);
+            this.telemetry.addData("Intake", "Started");
         } else if (this.gamepad2.dpad_down) {
             intake_motor.setPower(INTAKE_MOTOR_STOP_POWER);
         }

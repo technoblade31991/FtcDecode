@@ -136,18 +136,18 @@ public class Shooter {
 
     private void setPower(double power){
         if (this.newRobot) {
-            launcher.setPower(power);
-        } else {
             leftLauncher.setPower(power);
             rightLauncher.setPower(power);
+        } else {
+            launcher.setPower(power);
         }
     }
 
     private double getVelocity(){
         if (this.newRobot) {
-            return launcher.getVelocity();
-        } else {
             return (leftLauncher.getVelocity() + rightLauncher.getVelocity()) / 2.0;
+        } else {
+            return launcher.getVelocity();
         }
     }
 
