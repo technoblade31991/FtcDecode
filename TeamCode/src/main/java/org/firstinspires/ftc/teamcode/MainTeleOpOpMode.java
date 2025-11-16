@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -16,18 +14,19 @@ import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 @TeleOp(name = "MainTeleOpOpModeCombinedAb11")
 public class MainTeleOpOpMode extends LinearOpMode {
 
-    double forward, strafe, rotate, maxSpeed;
-
+    public static final double INTAKE_MOTOR_POWER = 1.0;
     private static final boolean DRIVE_ENABLED = true;
-    private static final boolean SHOOT_ENABLED = false;
+    private static boolean SHOOT_ENABLED = true;
+    private static boolean INTAKE_ENABLED = true;
+    private static boolean DISTANCE_ENABLED = true;
     private static boolean CAMERA_ENABLED = false;
+    double forward, strafe, rotate, maxSpeed;
     private DistanceSensor distanceSensor;
     private DcMotorEx intake_motor = null;
     private DcMotorEx flywheel_left = null;
     private DcMotorEx flywheel_right = null;
 
-    public static final double INTAKE_MOTOR_POWER = 1.0;
-
+    @Override
     public void runOpMode() {
         // Initialize hardware
 
@@ -37,7 +36,9 @@ public class MainTeleOpOpMode extends LinearOpMode {
             distanceSensor = hardwareMap.get(DistanceSensor.class, "distance_Sensor");
 
         } catch (Exception e) {
-
+            telemetry.addData("ERROR", "distance_Sensor not found");
+            telemetry.update();
+            DISTANCE_ENABLED = false;
         }
 
         // Initialize intake motor
@@ -46,52 +47,53 @@ public class MainTeleOpOpMode extends LinearOpMode {
         } catch (Exception e) {
             telemetry.addData("ERROR", "intake_motor not found");
             telemetry.update();
+            INTAKE_ENABLED = false;
         }
 
-        // Initialize flywheel motor
-        try {
-            flywheel_left = hardwareMap.get(DcMotorEx.class, "flywheel_left");
-        } catch (Exception e) {
-            telemetry.addData("ERROR", "flywheel_left motor not found");
-            telemetry.update();
-        }
+        if (SHOOT_ENABLED) {
 
-        try {
-            flywheel_right = hardwareMap.get(DcMotorEx.class, "flywheel_right");
-        } catch (Exception e) {
-            telemetry.addData("ERROR", "flywheel_right not found");
-            telemetry.update();
-        }
-
-        if (CAMERA_ENABLED) {
-            if (!aprilTag.init(hardwareMap)) {
-                telemetry.addData("AprilTag", "Camera initialization failed!");
+            // Initialize flywheel motor
+            try {
+                flywheel_left = hardwareMap.get(DcMotorEx.class, "flywheel_left");
+            } catch (Exception e) {
+                telemetry.addData("ERROR", "flywheel_left motor not found");
                 telemetry.update();
-                aprilTag = null;
-                CAMERA_ENABLED = false;
+                // TODO: Should we still try to launch if only one flywheel is present?
+                SHOOT_ENABLED = false;
             }
-        } else {
-            aprilTag = null;
+
+            try {
+                flywheel_right = hardwareMap.get(DcMotorEx.class, "flywheel_right");
+                flywheel_right.setDirection(DcMotorSimple.Direction.REVERSE);
+            } catch (Exception e) {
+                telemetry.addData("ERROR", "flywheel_right not found");
+                telemetry.update();
+                // TODO: Should we still try to launch if only one flywheel is present?
+                SHOOT_ENABLED = false;
+
+            }
+
+        }
+        /* Initialize AprilTag camera only if CAMERA_ENABLED is true */
+        if (CAMERA_ENABLED && !aprilTag.init(hardwareMap)) {
+            telemetry.addData("AprilTag", "Camera initialization failed!");
+            telemetry.update();
+            CAMERA_ENABLED = false;
         }
         flywheel_left.setPower(0.8);
-        flywheel_right.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheel_right.setPower(0.8);
-     intake_motor.setPower(0);
+        intake_motor.setPower(0);
 
         MecanumDrive drive;
         // Initialize mecanum drive
         if (DRIVE_ENABLED) {
             drive = new MecanumDrive();
             drive.init(hardwareMap, telemetry);
-        } else {
-            drive = null;
         }
-        Shooter shooter;
+        Shooter shooter = null;
         if (SHOOT_ENABLED) {
             shooter = new Shooter();
             shooter.init(hardwareMap, gamepad2, telemetry);
-        } else {
-            shooter = null;
         }
 
         waitForStart();
@@ -100,6 +102,7 @@ public class MainTeleOpOpMode extends LinearOpMode {
                 aprilTag.listen(telemetry, gamepad1, drive);
             }
             if (SHOOT_ENABLED) {
+                assert shooter != null;
                 shooter.listen(false);
             }
             /* Mecanum drive control
@@ -116,35 +119,33 @@ public class MainTeleOpOpMode extends LinearOpMode {
                 forward = gamepad1.right_stick_y;
                 strafe = -gamepad1.right_stick_x;
                 rotate = gamepad1.left_stick_x;
-     
+
                 drive.driveRelativeRobot(forward, strafe, rotate, 0.25);
-            }
-            else if (DRIVE_ENABLED) {
-                    forward = gamepad1.right_stick_y;
-                    // Strafe is reversed due to weird issues
-                    strafe = -gamepad1.right_stick_x;
-                    rotate = gamepad1.left_stick_x;
-                    drive.driveRelativeRobot(forward, strafe, rotate, 1);
-            }
-
-
-            /*
-            double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-
-            // 2. Check the distance range using the logical AND operator (&&)
-            if (distance > 24 && distance < 28) {
-                // Rumbles the controller for 5000ms (5 seconds)
-                // Note: Consider a shorter rumble or a pattern for better feedback
-                // gamepad1.rumble(1.0, 1.0, 3000);
-                telemetry.addData("Status", "TARGET IN RANGE");
-            } else {
-                telemetry.addData("Status", "Keep driving...");
+            } else if (DRIVE_ENABLED) {
+                forward = gamepad1.right_stick_y;
+                // Strafe is reversed due to weird issues
+                strafe = -gamepad1.right_stick_x;
+                rotate = gamepad1.left_stick_x;
+                drive.driveRelativeRobot(forward, strafe, rotate, 1);
             }
 
-            telemetry.addData("Distance (in)", distance);
-            telemetry.update();
 
-             */
+            if (DISTANCE_ENABLED) {
+                double distance = distanceSensor.getDistance(DistanceUnit.INCH);
+
+                // 2. Check the distance range using the logical AND operator (&&)
+                if (distance > 24 && distance < 28) {
+                    // Rumbles the controller for 5000ms (5 seconds)
+                    // Note: Consider a shorter rumble or a pattern for better feedback
+                    // gamepad1.rumble(1.0, 1.0, 3000);
+                    telemetry.addData("Status", "TARGET IN RANGE");
+                } else {
+                    telemetry.addData("Status", "Keep driving...");
+                }
+
+                telemetry.addData("Distance (in)", distance);
+                telemetry.update();
+            }
         }
     }
 }
