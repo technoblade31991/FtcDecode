@@ -97,7 +97,7 @@ public class Shooter {
         return true;
     }
 
-    private boolean init_old_robot_launcher(HardwareMap hardwareMap) {
+    private boolean init_new_robot_launcher(HardwareMap hardwareMap) {
         // TODO: Should we still try to launch if only one flywheel is present?
         try {
             this.leftLauncher = hardwareMap.get(DcMotorEx.class, "flywheel_left");
@@ -112,17 +112,20 @@ public class Shooter {
             telemetry.addData("ERROR", "flywheel_right not found");
             return false;
         }
+        this.leftLauncher.setZeroPowerBehavior(BRAKE);
+        this.rightLauncher.setZeroPowerBehavior(BRAKE);
         this.launcher = null;
         return true;
     }
 
-    private boolean init_new_robot_launcher(HardwareMap hardwareMap) {
+    private boolean init_old_robot_launcher(HardwareMap hardwareMap) {
         try {
             this.launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         } catch (Exception e) {
             telemetry.addData("ERROR", "launcher not found");
             return false;
         }
+        this.launcher.setZeroPowerBehavior(BRAKE);
         this.leftLauncher = null;
         this.rightLauncher = null;
         return true;
