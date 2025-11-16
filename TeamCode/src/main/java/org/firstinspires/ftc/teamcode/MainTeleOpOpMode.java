@@ -25,10 +25,13 @@ public class MainTeleOpOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        // Initialize hardware
+        /* Initialize hardware */
 
-        // Initialize aprilTag
+        /* Initialize aprilTag only if CAMERA_ENABLED is true */
         AprilTag aprilTag = new AprilTag();
+        if (CAMERA_ENABLED && !aprilTag.init(hardwareMap, telemetry)) {
+            CAMERA_ENABLED = false;
+        }
 
         /* Initialize distance sensor only if DISTANCE_ENABLED is true */
         DistanceSensor distanceSensor = new DistanceSensor();
@@ -69,12 +72,7 @@ public class MainTeleOpOpMode extends LinearOpMode {
             }
 
         }
-        /* Initialize AprilTag camera only if CAMERA_ENABLED is true */
-        if (CAMERA_ENABLED && !aprilTag.init(hardwareMap)) {
-            telemetry.addData("AprilTag", "Camera initialization failed!");
-            telemetry.update();
-            CAMERA_ENABLED = false;
-        }
+
         flywheel_left.setPower(0.8);
         flywheel_right.setPower(0.8);
         intake_motor.setPower(0);

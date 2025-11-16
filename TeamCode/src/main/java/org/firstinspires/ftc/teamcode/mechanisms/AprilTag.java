@@ -31,7 +31,7 @@ public class AprilTag {
     /*
     Returns true if initialization was successful, else false.
     */
-    public boolean init(HardwareMap hardwareMap) {
+    public boolean init(HardwareMap hardwareMap, Telemetry telemetry) {
         boolean targetFound = false;    // Set to true when an AprilTag target is detected
 
         // --- Step 1: Hardware Configuration ---
@@ -43,6 +43,8 @@ public class AprilTag {
         try {
             webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         } catch (Exception e) {
+            telemetry.addData("AprilTag", "Camera initialization failed!");
+            telemetry.update();
             return false;
         }
 
