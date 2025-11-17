@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import static android.os.SystemClock.sleep;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
+
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -32,8 +34,8 @@ public class Shooter {
     private State state = State.OFF;
     /* Power constants for the launcher and servos. */
     public static final double LAUNCH_STOP_LAUNCHER_POWER = 0; /* Launcher off power */
-    public static final double LAUNCH_LAUNCHER_POWER = 0.6; /* Launcher running power */
-    public static final double LAUNCHER_TARGET_VELOCITY = 1390; /* Target velocity for launcher */
+    public static double LAUNCH_LAUNCHER_POWER = 0.8; /* Launcher running power */
+    public static double LAUNCHER_TARGET_VELOCITY = 5500; /* Target velocity for launcher */
     public static final double LAUNCH_STOP_LEFT_FEEDER_POWER = 0; /* Left feeder off power */
     public static final double LAUNCH_STOP_RIGHT_FEEDER_POWER = 0; /* Right feeder off power */
     public static final double LAUNCH_LEFT_FEEDER_POWER = 1; /* Left feeder running power */
@@ -91,14 +93,17 @@ public class Shooter {
     private boolean init_new_robot_launcher(HardwareMap hardwareMap) {
         try {
             this.leftLauncher = hardwareMap.get(DcMotorEx.class, "flywheel_left");
+            this.leftLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
+
         } catch (Exception e) {
             telemetry.addData("ERROR", "flywheel_left not found");
+            return false;
         }
         try {
             this.rightLauncher = hardwareMap.get(DcMotorEx.class, "flywheel_right");
-            this.rightLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
         } catch (Exception e) {
             telemetry.addData("ERROR", "flywheel_right not found");
+            return false;
         }
         this.leftLauncher.setZeroPowerBehavior(BRAKE);
         this.rightLauncher.setZeroPowerBehavior(BRAKE);
@@ -154,7 +159,25 @@ public class Shooter {
     public boolean isFeeding(){
         return state == State.FEED;
     }
-    public void listen() {
+    public void listen()  {
+        this.telemetry.addData("Velocity", LAUNCHER_TARGET_VELOCITY);
+        if (gamepad2.dpadUpWasPressed()) {
+            LAUNCHER_TARGET_VELOCITY += 100;
+        } else if (gamepad2.dpadDownWasPressed()) {
+            LAUNCHER_TARGET_VELOCITY -= 100;
+        }
+
+        this.telemetry.addData("Power", LAUNCH_LAUNCHER_POWER);
+        if (gamepad2.dpadRightWasPressed()) {
+            LAUNCH_LAUNCHER_POWER += 0.01;
+        } else if (gamepad2.dpadLeftWasPressed()) {
+            LAUNCH_LAUNCHER_POWER -= 0.01;
+        }
+
+        this.telemetry.addData("State", state);
+        //sleep(5000);
+        // TODO: Remove redundant update
+        this.telemetry.update();
         switch (state) {
             case OFF:
                 if (gamepad2.right_bumper||this.autonomous) {
@@ -238,7 +261,7 @@ public class Shooter {
         }
         this.telemetry.addData("state", state);
     }
-    public void launch_n_balls(int n){
+    public void launch_n_balls(int n)  {
 
         /* Launch n balls in succession */
         for (int i = 0; i < n; i++) {
