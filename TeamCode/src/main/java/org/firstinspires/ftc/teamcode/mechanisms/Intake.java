@@ -27,10 +27,10 @@ public class Intake {
 
     public void listen() {
         if (this.gamepad2.dpad_up) {
-            this.telemetry.addData("Intake", "Starting");
+            this.telemetry.addData("Intake", "On");
             intake_motor.setPower(INTAKE_MOTOR_FULL_POWER);
-            this.telemetry.addData("Intake", "Started");
         } else if (this.gamepad2.dpad_down) {
+            this.telemetry.addData("Intake", "Off");
             intake_motor.setPower(INTAKE_MOTOR_STOP_POWER);
         }
     }

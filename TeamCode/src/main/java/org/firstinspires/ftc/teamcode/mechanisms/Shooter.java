@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import static android.os.SystemClock.sleep;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
 
@@ -70,7 +69,6 @@ public class Shooter {
             left_feeder = hardwareMap.crservo.get("left_feeder");
         } catch (Exception e) {
             telemetry.addData("ERROR", "Left feeder not found");
-            return false;
         }
         left_feeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -79,7 +77,6 @@ public class Shooter {
             right_feeder = hardwareMap.crservo.get("right_feeder");
         } catch (Exception e) {
             telemetry.addData("ERROR", "Right feeder not found");
-            return false;
         }
 
         // Initialize launcher motor(s)
@@ -139,7 +136,7 @@ public class Shooter {
         return state == State.STOPPING;
     }
 
-    private void setPower(double power){
+    private void setLauncherPower(double power){
         if (this.newRobot) {
             leftLauncher.setPower(power);
             rightLauncher.setPower(power);
@@ -148,7 +145,7 @@ public class Shooter {
         }
     }
 
-    private double getVelocity(){
+    private double getLauncherVelocity(){
         if (this.newRobot) {
             return (leftLauncher.getVelocity() + rightLauncher.getVelocity()) / 2.0;
         } else {
@@ -161,23 +158,18 @@ public class Shooter {
     }
     public void listen()  {
         this.telemetry.addData("Velocity", LAUNCHER_TARGET_VELOCITY);
-        if (gamepad2.dpadUpWasPressed()) {
-            LAUNCHER_TARGET_VELOCITY += 100;
-        } else if (gamepad2.dpadDownWasPressed()) {
-            LAUNCHER_TARGET_VELOCITY -= 100;
-        }
-
-        this.telemetry.addData("Power", LAUNCH_LAUNCHER_POWER);
-        if (gamepad2.dpadRightWasPressed()) {
-            LAUNCH_LAUNCHER_POWER += 0.01;
-        } else if (gamepad2.dpadLeftWasPressed()) {
-            LAUNCH_LAUNCHER_POWER -= 0.01;
-        }
-
-        this.telemetry.addData("State", state);
-        //sleep(5000);
-        // TODO: Remove redundant update
-        this.telemetry.update();
+//        if (gamepad2.dpadUpWasPressed()) {
+//            LAUNCHER_TARGET_VELOCITY += 100;
+//        } else if (gamepad2.dpadDownWasPressed()) {
+//            LAUNCHER_TARGET_VELOCITY -= 100;
+//        }
+//
+//        this.telemetry.addData("Power", LAUNCH_LAUNCHER_POWER);
+//        if (gamepad2.dpadRightWasPressed()) {
+//            LAUNCH_LAUNCHER_POWER += 0.01;
+//        } else if (gamepad2.dpadLeftWasPressed()) {
+//            LAUNCH_LAUNCHER_POWER -= 0.01;
+//        }
         switch (state) {
             case OFF:
                 if (gamepad2.right_bumper||this.autonomous) {
@@ -190,12 +182,12 @@ public class Shooter {
                     state = State.STARTING;
 
                     timer.reset();
-                    this.setPower(LAUNCH_LAUNCHER_POWER);
+                    this.setLauncherPower(LAUNCH_LAUNCHER_POWER);
 
                 }
                 break;
             case STARTING:
-                if ((this.getVelocity() >= LAUNCHER_TARGET_VELOCITY) || (timer.milliseconds() > LAUNCH_LAUNCHER_FULL_SPEED_MS)) {
+                if ((this.getLauncherVelocity() >= LAUNCHER_TARGET_VELOCITY) || (timer.milliseconds() > LAUNCH_LAUNCHER_FULL_SPEED_MS)) {
                     /* Once launcher motor is at full speed,
                      * set the state to FEED, reset the timer and
                      * start the launcher servos.
@@ -208,7 +200,7 @@ public class Shooter {
                 }
                 break;
             case FEED:
-                telemetry.addData("Launch Velocity",this.getVelocity());
+                telemetry.addData("Launch Velocity",this.getLauncherVelocity());
                 if (timer.milliseconds() > LAUNCH_FEED_MS) {
                     /* Once feed time is complete,transition to LAUNCHING state,
                      * start the timer and
@@ -228,14 +220,14 @@ public class Shooter {
                      */
                     state = State.STOPPING;
                     timer.reset();
-                    this.setPower(LAUNCH_LAUNCHER_POWER);
+                    this.setLauncherPower(LAUNCH_LAUNCHER_POWER);
                 }
 
                 break;
             case STOPPING:
                 /* In case of continuous launch enforcement, we need to go back to FEED state */
                 if (gamepad2.right_bumper || autonomous) {
-                    if ((this.getVelocity() >= LAUNCHER_TARGET_VELOCITY) ||(timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS)) {
+                    if ((this.getLauncherVelocity() >= LAUNCHER_TARGET_VELOCITY) ||(timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS)) {
                         state = State.FEED;
                         left_feeder.setPower(LAUNCH_LEFT_FEEDER_POWER);
                         right_feeder.setPower(LAUNCH_RIGHT_FEEDER_POWER);
@@ -247,7 +239,7 @@ public class Shooter {
                     /* Stop all motors and servos and transition to OFF state */
                     left_feeder.setPower(LAUNCH_STOP_LEFT_FEEDER_POWER);
                     right_feeder.setPower(LAUNCH_STOP_RIGHT_FEEDER_POWER);
-                    this.setPower(LAUNCH_STOP_LAUNCHER_POWER);
+                    this.setLauncherPower(LAUNCH_STOP_LAUNCHER_POWER);
                     state = State.OFF;
                 }
                 break;

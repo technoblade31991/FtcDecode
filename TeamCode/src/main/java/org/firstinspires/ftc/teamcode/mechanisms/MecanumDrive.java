@@ -72,9 +72,9 @@ public class MecanumDrive {
         double maxSpeed = 1;
         if (this.gamepad1.left_trigger > 0.5) {
             maxSpeed = 0.25;
-            this.telemetry.addData("Mode", "Park Assist");
+            this.telemetry.addData("Drive Mode", "Park Assist");
         } else {
-            this.telemetry.addData("Mode", "Normal");
+            this.telemetry.addData("Drive Mode", "Normal");
         }
 
         double forward = this.gamepad1.right_stick_y;
