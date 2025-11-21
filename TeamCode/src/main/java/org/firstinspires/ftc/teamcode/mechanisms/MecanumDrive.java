@@ -11,8 +11,11 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MecanumDrive {
+    private static final double MIN_TRIGGER_THRESHOLD = 0.5;
+    private static final double FULL_SPEED = 1.0;
+    private static final double SLOW_SPEED = 0.25;
     private DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
-    private IMU  imu;
+    private IMU imu;
     private Gamepad gamepad1;
     private Telemetry telemetry;
 
@@ -45,13 +48,10 @@ public class MecanumDrive {
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        imu =    hwMap.get(IMU.class, "imu");
+        imu = hwMap.get(IMU.class, "imu");
 
         // Square orientation right angle control hub needed
-        RevHubOrientationOnRobot revOrientation = new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
-                RevHubOrientationOnRobot.UsbFacingDirection.LEFT
-        );
+        RevHubOrientationOnRobot revOrientation = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD, RevHubOrientationOnRobot.UsbFacingDirection.LEFT);
 
         imu.initialize(new IMU.Parameters(revOrientation));
         this.gamepad1 = gamepad1;
@@ -69,9 +69,9 @@ public class MecanumDrive {
             else call regular mode
              */
         /* Park assist mode when left trigger is pressed */
-        double maxSpeed = 1;
-        if (this.gamepad1.left_trigger > 0.5) {
-            maxSpeed = 0.25;
+        double maxSpeed = FULL_SPEED;
+        if (this.gamepad1.left_trigger > MIN_TRIGGER_THRESHOLD) {
+            maxSpeed = SLOW_SPEED;
             this.telemetry.addData("Drive Mode", "Park Assist");
         } else {
             this.telemetry.addData("Drive Mode", "Normal");
@@ -104,7 +104,6 @@ public class MecanumDrive {
         backRightMotor.setPower(maxSpeed * (backRightPower / maxPower));
 
     }
-
 
     public void driveRelativeField(double forward, double strafe, double rotate) {
         double theta = Math.atan2(forward, strafe);

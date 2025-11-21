@@ -53,6 +53,7 @@ public class Shooter {
     private Gamepad gamepad2;
     private Telemetry telemetry;
     private final ElapsedTime timer = new ElapsedTime();
+    private static final PIDFCoefficients PIDF_COEFFICIENTS = new PIDFCoefficients(300, 0, 0, 10);
 
     /*
      * Returns true if initialization was successful, else false.
@@ -107,8 +108,8 @@ public class Shooter {
         leftLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         /* Use PIDF coefficients to control launcher velocity */
-        leftLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(300,0,0,10));
-        rightLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(300,0,0,10));
+        leftLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PIDF_COEFFICIENTS);
+        rightLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PIDF_COEFFICIENTS);
         this.launcher = null;
         return true;
     }
@@ -123,7 +124,7 @@ public class Shooter {
         this.launcher.setZeroPowerBehavior(BRAKE);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         /* Use PIDF coefficients to control launcher velocity */
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(300,0,0,10));
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PIDF_COEFFICIENTS);
         this.leftLauncher = null;
         this.rightLauncher = null;
         return true;
@@ -158,18 +159,18 @@ public class Shooter {
     }
     public void listen()  {
         this.telemetry.addData("Velocity", LAUNCHER_TARGET_VELOCITY);
-//        if (gamepad2.dpadUpWasPressed()) {
-//            LAUNCHER_TARGET_VELOCITY += 100;
-//        } else if (gamepad2.dpadDownWasPressed()) {
-//            LAUNCHER_TARGET_VELOCITY -= 100;
-//        }
-//
-//        this.telemetry.addData("Power", LAUNCH_LAUNCHER_POWER);
-//        if (gamepad2.dpadRightWasPressed()) {
-//            LAUNCH_LAUNCHER_POWER += 0.01;
-//        } else if (gamepad2.dpadLeftWasPressed()) {
-//            LAUNCH_LAUNCHER_POWER -= 0.01;
-//        }
+        if (gamepad2.dpadUpWasPressed()) {
+            LAUNCHER_TARGET_VELOCITY += 100;
+        } else if (gamepad2.dpadDownWasPressed()) {
+            LAUNCHER_TARGET_VELOCITY -= 100;
+        }
+
+        this.telemetry.addData("Power", LAUNCH_LAUNCHER_POWER);
+        if (gamepad2.dpadRightWasPressed()) {
+            LAUNCH_LAUNCHER_POWER += 0.01;
+        } else if (gamepad2.dpadLeftWasPressed()) {
+            LAUNCH_LAUNCHER_POWER -= 0.01;
+        }
         switch (state) {
             case OFF:
                 if (gamepad2.right_bumper||this.autonomous) {

@@ -37,7 +37,7 @@ public class MainTeleOpOpMode extends LinearOpMode {
         if (CAMERA_ENABLED && !aprilTag.init(hardwareMap, telemetry, gamepad1, drive)) {
             CAMERA_ENABLED = false;
         }
-        if (INTAKE_ENABLED && !intake.init(hardwareMap, telemetry, gamepad2)) {
+        if (INTAKE_ENABLED && !intake.init(hardwareMap, telemetry, gamepad1)) {
             INTAKE_ENABLED = false;
         }
         if (DISTANCE_ENABLED && !distanceSensor.init(hardwareMap, telemetry)) {
