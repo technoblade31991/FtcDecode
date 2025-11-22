@@ -68,7 +68,7 @@ public class MainAutonomousOpMode extends LinearOpMode {
             encoderDrive(DRIVE_SPEED, TARGET_DISTANCE_INCHES);
             if (SHOOT_ENABLED) {
 
-                shooter.launch_n_balls(NUM_BALLS);
+                shooter.launch_n_artifacts(NUM_BALLS);
             }
             encoderDrive(0.5, -5);
             strafeLeftInches(20, 0.5);

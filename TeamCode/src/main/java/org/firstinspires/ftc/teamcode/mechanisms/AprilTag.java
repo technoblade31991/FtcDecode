@@ -15,6 +15,10 @@ import java.util.List;
 
 public class AprilTag {
     private static final int DESIRED_TAG_ID = -1;     // Choose the tag you want to approach or set to -1 for ANY tag.
+    private static final double FX = 636.967;
+    private static final double FY = 636.967;
+    private static final double CX = 319.933;
+    private static final double CY = 251.434;
     private static final double DESIRED_DISTANCE = 30.0;
     private static final double SPEED_GAIN = 0.02;   //  Forward Speed Control "Gain". e.g. Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
     private static final double STRAFE_GAIN = 0.015;   //  Strafe Speed Control "Gain".  e.g. Ramp up to 37% power at a 25 degree Yaw error.   (0.375 / 25.0)
@@ -54,7 +58,7 @@ public class AprilTag {
         // --- Step 2: Initialize the AprilTag Processor ---
         // This is the "brains" that will do the AprilTag detection.
         // We use .Builder() to create a new processor.
-        aprilTag = new AprilTagProcessor.Builder().setLensIntrinsics(636.967, 636.967, 319.933, 251.434).build();
+        aprilTag = new AprilTagProcessor.Builder().setLensIntrinsics(FX, FY, CX, CY).build();
 
         // --- Step 3: Initialize the VisionPortal ---
         // This is the "eyes" that connects the camera to the processor.

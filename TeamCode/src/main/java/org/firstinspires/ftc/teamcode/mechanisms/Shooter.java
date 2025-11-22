@@ -254,9 +254,9 @@ public class Shooter {
         }
         this.telemetry.addData("state", state);
     }
-    public void launch_n_balls(int n)  {
+    public void launch_n_artifacts(int n)  {
 
-        /* Launch n balls in succession */
+        /* Launch n artifacts in succession */
         for (int i = 0; i < n; i++) {
             telemetry.addData("Shooting", "Ball %d", i + 1);
 
