@@ -55,7 +55,7 @@ public class Shooter {
      * Returns true if initialization was successful, else false.
      * newRobot indicates whether this is a new robot configuration, the one with two flywheels.
      */
-    public boolean init(OpMode opMode) {
+    public boolean init(OpMode opMode, boolean NEW_ROBOT) {
         this.opMode = opMode;
         // Initialize left feeder servo and set to reverse direction
         try {
@@ -73,7 +73,7 @@ public class Shooter {
         }
 
         // Initialize launcher motor(s)
-        if (this.opMode.NEW_ROBOT) {
+        if (this.NEW_ROBOT) {
             return init_new_robot_launcher(this.opMode.hardwareMap);
         } else {
             return init_old_robot_launcher(this.opMode.hardwareMap);

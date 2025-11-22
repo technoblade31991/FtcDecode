@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -31,12 +30,14 @@ public class AprilTag {
     public AprilTagPoseFtc pose;
     private AprilTagProcessor aprilTag;
     private OpMode opMode;
+    private MecanumDrive drive;
 
     /*
     Returns true if initialization was successful, else false.
     */
-    public boolean init(OpMode opMode) {
+    public boolean init(OpMode opMode, org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive drive) {
         this.opMode = opMode;
+        this.drive = drive;
 
         // --- Step 1: Hardware Configuration ---
         // Every webcam (like your C925) needs to be in your robot's
@@ -128,7 +129,7 @@ public class AprilTag {
             double forward = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
             double rotate = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
             double strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
-            drive.driveRelativeField(forward, strafe, rotate);
+            this.drive.driveRelativeRobot(forward, strafe, rotate, MAX_AUTO_SPEED);
         }
     }
 
