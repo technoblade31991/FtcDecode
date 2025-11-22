@@ -2,105 +2,70 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTag;
+import org.firstinspires.ftc.teamcode.mechanisms.DistanceSensor;
+import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 
-@TeleOp(name = "MainTeleOpOpModeCombinedAb02")
+@TeleOp(name = "MainTeleOpOpModeCombinedAb11")
 public class MainTeleOpOpMode extends LinearOpMode {
 
-    double forward, strafe, rotate, maxSpeed;
-
-    private static final boolean DRIVE_ENABLED = true;
-    private static final boolean SHOOT_ENABLED = true;
+    private static boolean DRIVE_ENABLED = true;
+    private static boolean SHOOT_ENABLED = true;
+    private static boolean INTAKE_ENABLED = false;
+    private static boolean DISTANCE_ENABLED = true;
     private static boolean CAMERA_ENABLED = false;
-    private DistanceSensor distanceSensor;
+    public static final boolean NEW_ROBOT = true;
 
     @Override
-    public void runOpMode() {
-        // Initialize hardware
-
-        // Initialize aprilTag
+    public void runOpMode() throws InterruptedException {/* Initialize shooter, drive, aprilTag, intake, and  distance sensor only if their respective enabled booleans are true */
+        Shooter shooter = new Shooter();
+        MecanumDrive drive = new MecanumDrive();
         AprilTag aprilTag = new AprilTag();
-        distanceSensor = hardwareMap.get(DistanceSensor.class, "distance_Sensor");
+        Intake intake = new Intake();
+        DistanceSensor distanceSensor = new DistanceSensor();
 
-        if (CAMERA_ENABLED) {
-            if (!aprilTag.init(hardwareMap)) {
-                telemetry.addData("AprilTag", "Camera initialization failed!");
-                telemetry.update();
-                aprilTag = null;
-                CAMERA_ENABLED = false;
-            }
-        } else {
-            aprilTag = null;
+        telemetry.addLine("After constructor");
+        if (SHOOT_ENABLED && !shooter.init(hardwareMap, gamepad2, telemetry, false, NEW_ROBOT)) {
+            SHOOT_ENABLED = false;
         }
-
-
-
-        MecanumDrive drive;
-        // Initialize mecanum drive
-        if (DRIVE_ENABLED) {
-            drive = new MecanumDrive();
-            drive.init(hardwareMap, telemetry);
-        } else {
-            drive = null;
+        if (DRIVE_ENABLED && !drive.init(hardwareMap, telemetry, gamepad1)) {
+            DRIVE_ENABLED = false;
         }
-        Shooter shooter;
-        if (SHOOT_ENABLED) {
-            shooter = new Shooter();
-            shooter.init(hardwareMap, gamepad2, telemetry);
-        } else {
-            shooter = null;
+        if (CAMERA_ENABLED && !aprilTag.init(hardwareMap, telemetry, gamepad1, drive)) {
+            CAMERA_ENABLED = false;
         }
+        if (INTAKE_ENABLED && !intake.init(hardwareMap, telemetry, gamepad1)) {
+            INTAKE_ENABLED = false;
+        }
+        if (DISTANCE_ENABLED && !distanceSensor.init(hardwareMap, telemetry)) {
+            DISTANCE_ENABLED = false;
+        }
+        telemetry.addLine("After init");
+        telemetry.update();
 
         waitForStart();
         while (opModeIsActive()) {
-            if (CAMERA_ENABLED) {
-                aprilTag.listen(telemetry, gamepad1, drive);
-            }
+            telemetry.addLine("Before shoot");
+            telemetry.addData("Shoot enabled", SHOOT_ENABLED);
             if (SHOOT_ENABLED) {
-                shooter.listen(false);
+                shooter.listen();
             }
-            /* Mecanum drive control
-             * Left stick Y axis = forward/backward
-             * Left stick X axis = strafe left/right
-             * Right stick X axis = rotate clockwise/counterclockwise
-             * Drive relative to the field (not the robot) when right trigger is pressed
-             * If button is pressed And DRIVE_ENABLED
-            new mode call the driveRelativeRobot with maxSpeed = 0.5
-            else call regular mode
-             */
-
-            if (gamepad1.left_trigger > 0.5 && DRIVE_ENABLED) {
-                forward = gamepad1.right_stick_y;
-                strafe = -gamepad1.right_stick_x;
-                rotate = gamepad1.left_stick_x;
-     
-                drive.driveRelativeRobot(forward, strafe, rotate, 0.25);
+            telemetry.addLine("After shoot");
+            if (DRIVE_ENABLED) {
+                drive.listen();
             }
-            else if (DRIVE_ENABLED) {
-                    forward = gamepad1.right_stick_y;
-                    // Strafe is reversed due to weird issues
-                    strafe = -gamepad1.right_stick_x;
-                    rotate = gamepad1.left_stick_x;
-                    drive.driveRelativeRobot(forward, strafe, rotate, 1);
+            if (CAMERA_ENABLED) {
+                aprilTag.listen();
             }
-            double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-
-            // 2. Check the distance range using the logical AND operator (&&)
-            if (distance > 24 && distance < 28) {
-                // Rumbles the controller for 5000ms (5 seconds)
-                // Note: Consider a shorter rumble or a pattern for better feedback
-                // gamepad1.rumble(1.0, 1.0, 3000);
-                telemetry.addData("Status", "TARGET IN RANGE");
-            } else {
-                telemetry.addData("Status", "Keep driving...");
+            if (INTAKE_ENABLED) {
+                intake.listen();
             }
-
-            telemetry.addData("Distance (in)", distance);
+            if (DISTANCE_ENABLED) {
+                distanceSensor.listen();
+            }
             telemetry.update();
         }
     }

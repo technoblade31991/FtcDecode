@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+/* this is defined in MainTeleOpOpMode */
+import static org.firstinspires.ftc.teamcode.MainTeleOpOpMode.NEW_ROBOT;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
@@ -20,20 +22,20 @@ public class MainAutonomousOpMode extends LinearOpMode {
             (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                     (WHEEL_DIAMETER_INCHES * Math.PI);
 
-    static final double     DRIVE_SPEED             = 0.2;
+    static final double DRIVE_SPEED = 0.5;
     private DcMotor frontLeft, frontRight, backLeft, backRight;
-    double     TARGET_DISTANCE_INCHES  = -9.25; // Move backward 9.25 inches
-
-    private static final boolean DRIVE_ENABLED = true;
+    double FIRST_TARGET_DISTANCE_INCHES = -9.25; // Move backward 9.25 inches
+    double SECOND_TARGET_DISTANCE_INCHES = -5; // Move backward 5 inches
+    double THIRD_TARGET_DISTANCE_INCHES = 20; // Strafe left 20 inches
     private static final boolean SHOOT_ENABLED = true;
 
-    private static final int NUM_BALLS = 4;
+    private static final int NUM_ARTIFACTS = 4;
     @Override
     public void runOpMode() {
         Shooter shooter;
         if (SHOOT_ENABLED) {
             shooter = new Shooter();
-            shooter.init(hardwareMap, gamepad2, telemetry);
+            shooter.init(hardwareMap, gamepad2, telemetry, true, NEW_ROBOT);
         } else {
             shooter = null;
         }
@@ -64,17 +66,17 @@ public class MainAutonomousOpMode extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-            encoderDrive(DRIVE_SPEED, TARGET_DISTANCE_INCHES, 5.0);
+            encoderDrive(DRIVE_SPEED, FIRST_TARGET_DISTANCE_INCHES);
             if (SHOOT_ENABLED) {
 
-                shooter.launch_n_balls(NUM_BALLS);
+                shooter.launch_n_artifacts(NUM_ARTIFACTS);
             }
-            encoderDrive(0.5, -5, 5);
-            strafeLeftInches(20, 0.5);
+            encoderDrive(DRIVE_SPEED, SECOND_TARGET_DISTANCE_INCHES);
+            strafeLeftInches(THIRD_TARGET_DISTANCE_INCHES);
         }
     }
 
-    public void encoderDrive(double speed, double inches, double timeoutS) {
+    public void encoderDrive(double speed, double inches) {
         int newFrontLeftTarget;
         int newFrontRightTarget;
         int newBackLeftTarget;
@@ -126,7 +128,7 @@ public class MainAutonomousOpMode extends LinearOpMode {
         backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
-    private void strafeLeftInches(double inches, double power) {
+    private void strafeLeftInches(double inches) {
         int moveCounts = (int) (inches * COUNTS_PER_INCH);
 
         // Strafing left: set target positions
@@ -145,10 +147,10 @@ public class MainAutonomousOpMode extends LinearOpMode {
         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        frontLeft.setPower(power);
-        frontRight.setPower(power);
-        backLeft.setPower(power);
-        backRight.setPower(power);
+        frontLeft.setPower(MainAutonomousOpMode.DRIVE_SPEED);
+        frontRight.setPower(MainAutonomousOpMode.DRIVE_SPEED);
+        backLeft.setPower(MainAutonomousOpMode.DRIVE_SPEED);
+        backRight.setPower(MainAutonomousOpMode.DRIVE_SPEED);
 
         while (opModeIsActive() &&
                 (frontLeft.isBusy() && frontRight.isBusy() &&
