@@ -35,7 +35,7 @@ public class MainAutonomousOpMode extends LinearOpMode {
         Shooter shooter;
         if (SHOOT_ENABLED) {
             shooter = new Shooter();
-            shooter.init(hardwareMap, gamepad2, telemetry, true, NEW_ROBOT);
+            shooter.init(this);
         } else {
             shooter = null;
         }

@@ -2,12 +2,10 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MecanumDrive {
@@ -16,31 +14,30 @@ public class MecanumDrive {
     private static final double SLOW_SPEED = 0.25;
     private DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     private IMU imu;
-    private Gamepad gamepad1;
-    private Telemetry telemetry;
+    private OpMode opMode;
 
-    public boolean init(HardwareMap hwMap, Telemetry telemetry, Gamepad gamepad1) {
+    public boolean init(OpMode opMode) {
+        this.opMode = opMode;
         try {
-            frontLeftMotor = hwMap.get(DcMotor.class, "frontLeftMotor");
+            frontLeftMotor = opMode.hardwareMap.get(DcMotor.class, "frontLeftMotor");
         } catch (Exception e) {
-            telemetry.addData("ERROR", "frontLeftMotor not initialized");
+            this.opMode.telemetry.addData("ERROR", "frontLeftMotor not initialized");
         }
         try {
-            frontRightMotor = hwMap.get(DcMotor.class, "frontRightMotor");
+            frontRightMotor = opMode.hardwareMap.get(DcMotor.class, "frontRightMotor");
         } catch (Exception e) {
-            telemetry.addData("ERROR", "frontRightMotor not initialized");
+            this.opMode.telemetry.addData("ERROR", "frontRightMotor not initialized");
         }
         try {
-            backLeftMotor = hwMap.get(DcMotor.class, "backLeftMotor");
+            backLeftMotor = opMode.hardwareMap.get(DcMotor.class, "backLeftMotor");
         } catch (Exception e) {
-            telemetry.addData("ERROR", "backLeftMotor not initialized");
+            this.opMode.telemetry.addData("ERROR", "backLeftMotor not initialized");
         }
         try {
-            backRightMotor = hwMap.get(DcMotor.class, "backRightMotor");
+            backRightMotor = opMode.hardwareMap.get(DcMotor.class, "backRightMotor");
         } catch (Exception e) {
-            telemetry.addData("ERROR", "backRightMotor not initialized");
+            this.opMode.telemetry.addData("ERROR", "backRightMotor not initialized");
         }
-        this.telemetry = telemetry;
 
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -48,13 +45,12 @@ public class MecanumDrive {
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        imu = hwMap.get(IMU.class, "imu");
+        imu = opMode.hardwareMap.get(IMU.class, "imu");
 
         // Square orientation right angle control hub needed
         RevHubOrientationOnRobot revOrientation = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD, RevHubOrientationOnRobot.UsbFacingDirection.LEFT);
 
         imu.initialize(new IMU.Parameters(revOrientation));
-        this.gamepad1 = gamepad1;
         return true;
     }
 
@@ -70,17 +66,17 @@ public class MecanumDrive {
              */
         /* Park assist mode when left trigger is pressed */
         double maxSpeed = FULL_SPEED;
-        if (this.gamepad1.left_trigger > MIN_TRIGGER_THRESHOLD) {
+        if (this.opMode.gamepad1.left_trigger > MIN_TRIGGER_THRESHOLD) {
             maxSpeed = SLOW_SPEED;
-            this.telemetry.addData("Drive Mode", "Park Assist");
+            this.opMode.telemetry.addData("Drive Mode", "Park Assist");
         } else {
-            this.telemetry.addData("Drive Mode", "Normal");
+            this.opMode.telemetry.addData("Drive Mode", "Normal");
         }
 
-        double forward = this.gamepad1.right_stick_y;
+        double forward = this.opMode.gamepad1.right_stick_y;
         // Strafe is reversed due to weird issues
-        double strafe = -this.gamepad1.right_stick_x;
-        double rotate = this.gamepad1.left_stick_x;
+        double strafe = -this.opMode.gamepad1.right_stick_x;
+        double rotate = this.opMode.gamepad1.left_stick_x;
         this.driveRelativeRobot(forward, strafe, rotate, maxSpeed);
 
     }

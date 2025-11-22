@@ -1,28 +1,27 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class DistanceSensor {
     private static final double MIN_DISTANCE = 24; // Minimum distance in inches
     private static final double MAX_DISTANCE = 28; // Maximum distance in inches
-    private com.qualcomm.robotcore.hardware.DistanceSensor distanceSensor;
     private static final String deviceName = "distance_Sensor";
-    private Telemetry telemetry;
+    private com.qualcomm.robotcore.hardware.DistanceSensor distanceSensor;
+    private OpMode opMode;
     /*
     Returns true if initialization was successful, else false.
     */
 
-    public boolean init(HardwareMap hardwareMap, Telemetry telemetry) {
+    public boolean init(OpMode opMode) {
+        this.opMode = opMode;
         try {
-            distanceSensor = hardwareMap.get(com.qualcomm.robotcore.hardware.DistanceSensor.class, deviceName);
+            distanceSensor = opMode.hardwareMap.get(com.qualcomm.robotcore.hardware.DistanceSensor.class, deviceName);
         } catch (Exception e) {
-            telemetry.addData("ERROR", "distance_Sensor not found");
+            opMode.telemetry.addData("ERROR", "distance_Sensor not found");
             return false;
         }
-        this.telemetry = telemetry;
         return true;
     }
 
@@ -34,11 +33,11 @@ public class DistanceSensor {
             // Rumbles the controller for 5000ms (5 seconds)
             // Note: Consider a shorter rumble or a pattern for better feedback
             // gamepad1.rumble(1.0, 1.0, 3000);
-            this.telemetry.addData("Status", "TARGET IN RANGE");
+            this.opMode.telemetry.addData("Status", "TARGET IN RANGE");
         } else {
-            this.telemetry.addData("Status", "Keep driving...");
+            this.opMode.telemetry.addData("Status", "Keep driving...");
         }
 
-        this.telemetry.addData("Distance (in)", distance);
+        this.opMode.telemetry.addData("Distance (in)", distance);
     }
 }
