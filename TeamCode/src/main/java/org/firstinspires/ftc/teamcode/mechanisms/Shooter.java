@@ -3,23 +3,21 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Shooter {
-
-    private boolean autonomous;
-    private boolean newRobot;
     private DcMotorEx leftLauncher;
     private DcMotorEx rightLauncher;
+    private OpMode opMode;
 
     private enum State {
         OFF,
@@ -50,8 +48,6 @@ public class Shooter {
     private CRServo right_feeder = null;
 
     private DcMotorEx launcher;
-    private Gamepad gamepad2;
-    private Telemetry telemetry;
     private final ElapsedTime timer = new ElapsedTime();
     private static final PIDFCoefficients PIDF_COEFFICIENTS = new PIDFCoefficients(300, 0, 0, 10);
 
@@ -59,48 +55,44 @@ public class Shooter {
      * Returns true if initialization was successful, else false.
      * newRobot indicates whether this is a new robot configuration, the one with two flywheels.
      */
-    public boolean init(HardwareMap hardwareMap, Gamepad gamepad2, Telemetry telemetry, boolean autonomous, boolean newRobot) {
-        // Add gamepad2 to self
-        this.gamepad2 = gamepad2;
-        this.telemetry = telemetry;
-        this.autonomous = autonomous;
-        this.newRobot = newRobot;
+    public boolean init(OpMode opMode) {
+        this.opMode = opMode;
         // Initialize left feeder servo and set to reverse direction
         try {
-            left_feeder = hardwareMap.crservo.get("left_feeder");
+            left_feeder = opMode.hardwareMap.crservo.get("left_feeder");
         } catch (Exception e) {
-            telemetry.addData("ERROR", "Left feeder not found");
+            opMode.telemetry.addData("ERROR", "Left feeder not found");
         }
         left_feeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Initialize right feeder servo
         try {
-            right_feeder = hardwareMap.crservo.get("right_feeder");
+            right_feeder = opMode.hardwareMap.crservo.get("right_feeder");
         } catch (Exception e) {
-            telemetry.addData("ERROR", "Right feeder not found");
+            opMode.telemetry.addData("ERROR", "Right feeder not found");
         }
 
         // Initialize launcher motor(s)
-        if (newRobot) {
-            return init_new_robot_launcher(hardwareMap);
+        if (this.opMode.NEW_ROBOT) {
+            return init_new_robot_launcher(this.opMode.hardwareMap);
         } else {
-            return init_old_robot_launcher(hardwareMap);
+            return init_old_robot_launcher(this.opMode.hardwareMap);
         }
     }
 
     private boolean init_new_robot_launcher(HardwareMap hardwareMap) {
         try {
-            this.leftLauncher = hardwareMap.get(DcMotorEx.class, "flywheel_left");
+            this.leftLauncher = opMode.hardwareMap.get(DcMotorEx.class, "flywheel_left");
             this.leftLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
 
         } catch (Exception e) {
-            telemetry.addData("ERROR", "flywheel_left not found");
+            this.opMode.telemetry.addData("ERROR", "flywheel_left not found");
             return false;
         }
         try {
-            this.rightLauncher = hardwareMap.get(DcMotorEx.class, "flywheel_right");
+            this.rightLauncher = opMode.hardwareMap.get(DcMotorEx.class, "flywheel_right");
         } catch (Exception e) {
-            telemetry.addData("ERROR", "flywheel_right not found");
+            this.opMode.telemetry.addData("ERROR", "flywheel_right not found");
             return false;
         }
         this.leftLauncher.setZeroPowerBehavior(BRAKE);
@@ -116,9 +108,9 @@ public class Shooter {
 
     private boolean init_old_robot_launcher(HardwareMap hardwareMap) {
         try {
-            this.launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+            this.launcher = opMode.hardwareMap.get(DcMotorEx.class, "launcher");
         } catch (Exception e) {
-            telemetry.addData("ERROR", "launcher not found");
+            this.opMode.telemetry.addData("ERROR", "launcher not found");
             return false;
         }
         this.launcher.setZeroPowerBehavior(BRAKE);
@@ -158,22 +150,22 @@ public class Shooter {
         return state == State.FEED;
     }
     public void listen()  {
-        this.telemetry.addData("Velocity", LAUNCHER_TARGET_VELOCITY);
-        if (gamepad2.dpadUpWasPressed()) {
+        this.opMode.telemetry.addData("Velocity", LAUNCHER_TARGET_VELOCITY);
+        if (this.opMode.gamepad2.dpadUpWasPressed()) {
             LAUNCHER_TARGET_VELOCITY += 100;
-        } else if (gamepad2.dpadDownWasPressed()) {
+        } else if (this.opMode.gamepad2.dpadDownWasPressed()) {
             LAUNCHER_TARGET_VELOCITY -= 100;
         }
 
-        this.telemetry.addData("Power", LAUNCH_LAUNCHER_POWER);
-        if (gamepad2.dpadRightWasPressed()) {
+        this.opMode.telemetry.addData("Power", LAUNCH_LAUNCHER_POWER);
+        if (this.opMode.gamepad2.dpadRightWasPressed()) {
             LAUNCH_LAUNCHER_POWER += 0.01;
-        } else if (gamepad2.dpadLeftWasPressed()) {
+        } else if (this.opMode.gamepad2.dpadLeftWasPressed()) {
             LAUNCH_LAUNCHER_POWER -= 0.01;
         }
         switch (state) {
             case OFF:
-                if (gamepad2.right_bumper||this.autonomous) {
+                if (this.opMode.gamepad2.right_bumper||this.autonomous) {
                     /*
                      * Right bumper was pressed.
                      * Launching ball.
@@ -201,7 +193,7 @@ public class Shooter {
                 }
                 break;
             case FEED:
-                telemetry.addData("Launch Velocity",this.getLauncherVelocity());
+                this.opMode.telemetry.addData("Launch Velocity",this.getLauncherVelocity());
                 if (timer.milliseconds() > LAUNCH_FEED_MS) {
                     /* Once feed time is complete,transition to LAUNCHING state,
                      * start the timer and
@@ -227,7 +219,7 @@ public class Shooter {
                 break;
             case STOPPING:
                 /* In case of continuous launch enforcement, we need to go back to FEED state */
-                if (gamepad2.right_bumper || autonomous) {
+                if (this.opMode.gamepad2.right_bumper || autonomous) {
                     if ((this.getLauncherVelocity() >= LAUNCHER_TARGET_VELOCITY) ||(timer.milliseconds() > LAUNCH_LAUNCHER_ENFORCE_MS)) {
                         state = State.FEED;
                         left_feeder.setPower(LAUNCH_LEFT_FEEDER_POWER);
@@ -248,30 +240,30 @@ public class Shooter {
         /* At any point, if the left bumper is pressed,
          * transition to STOPPING state to stop the launch sequence.
          */
-        if (gamepad2.left_bumper) {
+        if (this.opMode.gamepad2.left_bumper) {
             state = State.STOPPING;
             return;
         }
-        this.telemetry.addData("state", state);
+        this.opMode.telemetry.addData("state", state);
     }
     public void launch_n_artifacts(int n)  {
 
         /* Launch n artifacts in succession */
         for (int i = 0; i < n; i++) {
-            telemetry.addData("Shooting", "Ball %d", i + 1);
+            this.opMode.telemetry.addData("Shooting", "Ball %d", i + 1);
 
-            telemetry.update();
+            this.opMode.telemetry.update();
             listen();
 
             while(!isFeeding()){
-                telemetry.addData("Shooting loop", "Ball %d", i + 1);
+                this.opMode.telemetry.addData("Shooting loop", "Ball %d", i + 1);
                 listen();
-                telemetry.update();
+                this.opMode.telemetry.update();
             }
             while (!isOff()) {
-                telemetry.addData("Shooting loop", "Ball %d", i + 1);
+                this.opMode.telemetry.addData("Shooting loop", "Ball %d", i + 1);
                 listen();
-                telemetry.update();
+                this.opMode.telemetry.update();
             }
         }
     }

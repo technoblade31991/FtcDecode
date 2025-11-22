@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -30,17 +30,13 @@ public class AprilTag {
 
     public AprilTagPoseFtc pose;
     private AprilTagProcessor aprilTag;
-    private Gamepad gamepad1;
-    private MecanumDrive drive;
-    private Telemetry telemetry;
+    private OpMode opMode;
 
     /*
     Returns true if initialization was successful, else false.
     */
-    public boolean init(HardwareMap hardwareMap, Telemetry telemetry, Gamepad gamepad1, MecanumDrive drive) {
-        this.gamepad1 = gamepad1;
-        this.drive=drive;
-        this.telemetry = telemetry;
+    public boolean init(OpMode opMode) {
+        this.opMode = opMode;
 
         // --- Step 1: Hardware Configuration ---
         // Every webcam (like your C925) needs to be in your robot's
@@ -49,9 +45,9 @@ public class AprilTag {
         // and add a webcam with the name "Webcam 1".
         WebcamName webcamName;
         try {
-            webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+            webcamName = opMode.hardwareMap.get(WebcamName.class, "Webcam 1");
         } catch (Exception e) {
-            telemetry.addData("AprilTag", "Camera initialization failed!");
+            opMode.telemetry.addData("AprilTag", "Camera initialization failed!");
             return false;
         }
 
@@ -101,27 +97,27 @@ public class AprilTag {
     public void listen() {
         // Get a list of all AprilTags that are currently visible
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-        this.telemetry.addData("# AprilTags Detected", currentDetections.size());
+        this.opMode.telemetry.addData("# AprilTags Detected", currentDetections.size());
 
         if (currentDetections.isEmpty()) {
-            this.telemetry.addLine("No AprilTags visible.");
+            this.opMode.telemetry.addLine("No AprilTags visible.");
         } else {
-            telemetry.addLine("---");
+            this.opMode.telemetry.addLine("---");
         }
 
         // Loop through all visible tags
-        LoopResult result = loop_through_tags(telemetry, currentDetections);
+        LoopResult result = loop_through_tags(this.opMode.telemetry, currentDetections);
 
         if (result.targetFound) {
-            telemetry.addData("\n>", "HOLD A to Drive to Target\n");
-            telemetry.addData("Found", "ID %d (%s)", result.desiredTag.id, result.desiredTag.metadata.name);
-            telemetry.addData("Range", "%5.1f inches", result.desiredTag.ftcPose.range);
-            telemetry.addData("Bearing", "%3.0f degrees", result.desiredTag.ftcPose.bearing);
-            telemetry.addData("Yaw", "%3.0f degrees", result.desiredTag.ftcPose.yaw);
+            this.opMode.telemetry.addData("\n>", "HOLD A to Drive to Target\n");
+            this.opMode.telemetry.addData("Found", "ID %d (%s)", result.desiredTag.id, result.desiredTag.metadata.name);
+            this.opMode.telemetry.addData("Range", "%5.1f inches", result.desiredTag.ftcPose.range);
+            this.opMode.telemetry.addData("Bearing", "%3.0f degrees", result.desiredTag.ftcPose.bearing);
+            this.opMode.telemetry.addData("Yaw", "%3.0f degrees", result.desiredTag.ftcPose.yaw);
         } else {
-            telemetry.addData("\n>", "Drive using joysticks to find valid target\n");
+            this.opMode.telemetry.addData("\n>", "Drive using joysticks to find valid target\n");
         }
-        if (gamepad1.a && result.targetFound) {
+        if (this.opMode.gamepad1.a && result.targetFound) {
 
             // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
             double rangeError = (DESIRED_DISTANCE - result.desiredTag.ftcPose.range);

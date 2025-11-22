@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.MainTeleOpOpMode.NEW_ROBOT;
+
+import static java.lang.Thread.sleep;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -21,6 +25,7 @@ public class PedroOpMode extends OpMode {
     public Follower follower; // Pedro Pathing follower instance
     private int pathState; // Current autonomous path state (state machine)
     private static boolean SHOOT_ENABLED = true;
+    private Shooter shooter;
 
     @Override
     public void init() {
@@ -33,14 +38,10 @@ public class PedroOpMode extends OpMode {
         Paths paths = new Paths(follower); // Build paths
 
         // Initialize shooter mechanism
-        Shooter shooter;
-        if (SHOOT_ENABLED) {
-            shooter = new Shooter();
-            shooter.init(hardwareMap, gamepad2, telemetry, true, true);
-        } else {
-            shooter = null;
+        this.shooter = new Shooter();
+        if (SHOOT_ENABLED && !shooter.init(this)) {
+            SHOOT_ENABLED = false;
         }
-
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
     }
@@ -48,7 +49,11 @@ public class PedroOpMode extends OpMode {
     @Override
     public void loop() {
         follower.update(); // Update Pedro Pathing
-        pathState = autonomousPathUpdate(); // Update autonomous state machine
+        try {
+            pathState = autonomousPathUpdate(); // Update autonomous state machine
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         // Log values to Panels and Driver Station
         panelsTelemetry.debug("Path State", pathState);
@@ -164,26 +169,27 @@ public class PedroOpMode extends OpMode {
         SHOOT_ARTIFACTS_3
     }
     AutonomousState currentState = AutonomousState.SHOOT_PRELOAD;
-    public int autonomousPathUpdate() {
+    public int autonomousPathUpdate() throws InterruptedException {
         switch (currentState) {
             case SHOOT_PRELOAD:
                 // In this state, we want to shoot the preloaded artifacts
-
+                shooter.listen();
                 currentState = AutonomousState.GET_ARTIFACTS_1_PATH;
                 break;
 
             case GET_ARTIFACTS_1_PATH:
-                if (!follower.isPathActive()) {
-                    follower.followPath(new Paths(follower).GettoARTIFACTS1);
+                // Follow path to get to the position to intake artifacts 1
+                follower.followPath(new Paths(follower).GettoArtifacts1);
+                // Wait until the path is completed
+                while (opModeIsActive() && follower.isBusy()) {
+                    idle();  // FTC-safe wait
                 }
-                if (follower.isPathCompleted()) {
-                    currentState = AutonomousState.INTAKE_ARTIFACTS_1_PATH;
-                }
+
                 break;
 
             case INTAKE_ARTIFACTS_1_PATH:
                 if (!follower.isPathActive()) {
-                    follower.followPath(new Paths(follower).IntakeARTIFACTS1);
+                    follower.followPath(new Paths(follower).IntakeArtifacts1);
                 }
                 if (follower.isPathCompleted()) {
                     currentState = AutonomousState.SHOOT_ARTIFACTS_1_PATH;
@@ -192,7 +198,7 @@ public class PedroOpMode extends OpMode {
 
             case SHOOT_ARTIFACTS_1_PATH:
                 if (!follower.isPathActive()) {
-                    follower.followPath(new Paths(follower).ShootARTIFACTS1);
+                    follower.followPath(new Paths(follower).ShootArtifacts1);
                 }
                 if (follower.isPathCompleted()) {
                     currentState = AutonomousState.SHOOT_ARTIFACTS_1;
@@ -206,7 +212,7 @@ public class PedroOpMode extends OpMode {
 
             case GET_ARTIFACTS_2_PATH:
                 if (!follower.isPathActive()) {
-                    follower.followPath(new Paths(follower).GettoARTIFACTS2);
+                    follower.followPath(new Paths(follower).GettoArtifacts2);
                 }
                 if (follower.isPathCompleted()) {
                     currentState = AutonomousState.INTAKE_ARTIFACTS_2_PATH;
@@ -215,7 +221,7 @@ public class PedroOpMode extends OpMode {
 
             case INTAKE_ARTIFACTS_2_PATH:
                 if (!follower.isPathActive()) {
-                    follower.followPath(new Paths(follower).IntakeARTIFACTS2);
+                    follower.followPath(new Paths(follower).IntakeArtifacts2);
                 }
                 if (follower.isPathCompleted()) {
                     currentState = AutonomousState.SHOOT_ARTIFACTS_2_PATH;
@@ -224,7 +230,7 @@ public class PedroOpMode extends OpMode {
 
             case SHOOT_ARTIFACTS_2_PATH:
                 if (!follower.isPathActive()) {
-                    follower.followPath(new Paths(follower).ShootARTIFACTS2);
+                    follower.followPath(new Paths(follower).ShootArtifacts2);
                 }
                 if (follower.isPathCompleted()) {
                     currentState = AutonomousState.SHOOT_ARTIFACTS_2;
@@ -234,6 +240,34 @@ public class PedroOpMode extends OpMode {
             case SHOOT_ARTIFACTS_2:
                 // Implement shooting logic here
                 currentState = AutonomousState.GET_ARTIFACTS_3_PATH;
+                break;
+            case GET_ARTIFACTS_3_PATH:
+                if (!follower.isPathActive()) {
+                    follower.followPath(new Paths(follower).GettoArtifacts3);
+                }
+                if (follower.isPathCompleted()) {
+                    currentState = AutonomousState.INTAKE_ARTIFACTS_3_PATH;
+                }
+                break;
+            case INTAKE_ARTIFACTS_3_PATH:
+                if (!follower.isPathActive()) {
+                    follower.followPath(new Paths(follower).IntakeArtifacts3);
+                }
+                if (follower.isPathCompleted()) {
+                    currentState = AutonomousState.SHOOT_ARTIFACTS_3_PATH;
+                }
+                break;
+            case SHOOT_ARTIFACTS_3_PATH:
+                if (!follower.isPathActive()) {
+                    follower.followPath(new Paths(follower).ShootArtifacts3);
+                }
+                if (follower.isPathCompleted()) {
+                    currentState = AutonomousState.SHOOT_ARTIFACTS_3;
+                }
+                break;
+            case SHOOT_ARTIFACTS_3:
+                // Implement shooting logic here
+                break;
         }
         return pathState;
     }
