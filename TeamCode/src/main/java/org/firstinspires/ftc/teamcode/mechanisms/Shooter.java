@@ -53,6 +53,8 @@ public class Shooter {
     private Gamepad gamepad2;
     private Telemetry telemetry;
     private final ElapsedTime timer = new ElapsedTime();
+
+    private static double finalVelocity;
     private static final PIDFCoefficients PIDF_COEFFICIENTS = new PIDFCoefficients(300, 0, 0, 10);
 
     /*
@@ -158,6 +160,7 @@ public class Shooter {
         return state == State.FEED;
     }
     public void listen()  {
+        telemetry.addData("FinalVelocity:", finalVelocity);
         this.telemetry.addData("Velocity", LAUNCHER_TARGET_VELOCITY);
         if (gamepad2.dpadUpWasPressed()) {
             LAUNCHER_TARGET_VELOCITY += 100;
@@ -194,6 +197,7 @@ public class Shooter {
                      * start the launcher servos.
                      */
                     state = State.FEED;
+                    finalVelocity = this.getLauncherVelocity();
 
                     timer.reset();
                     left_feeder.setPower(LAUNCH_LEFT_FEEDER_POWER);
@@ -258,6 +262,7 @@ public class Shooter {
 
         /* Launch n artifacts in succession */
         for (int i = 0; i < n; i++) {
+            telemetry.addData("Launcher Velocity:", finalVelocity);
             telemetry.addData("Shooting", "Ball %d", i + 1);
 
             telemetry.update();

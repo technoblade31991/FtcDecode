@@ -9,12 +9,12 @@ import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 
-@TeleOp(name = "MainTeleOpOpModeCombinedAb11")
+@TeleOp(name = "MainTeleOpOpModeCombinedAnya")
 public class MainTeleOpOpMode extends LinearOpMode {
 
     private static boolean DRIVE_ENABLED = true;
     private static boolean SHOOT_ENABLED = true;
-    private static boolean INTAKE_ENABLED = false;
+    private static boolean INTAKE_ENABLED = true;
     private static boolean DISTANCE_ENABLED = true;
     private static boolean CAMERA_ENABLED = false;
     public static final boolean NEW_ROBOT = true;

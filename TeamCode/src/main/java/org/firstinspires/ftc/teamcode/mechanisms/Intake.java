@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -21,6 +22,7 @@ public class Intake {
             telemetry.addData("ERROR", "intake_motor not found");
             return false;
         }
+        intake_motor.setDirection(DcMotorSimple.Direction.REVERSE);
         this.gamepad1 = gamepad1;
         this.telemetry = telemetry;
         return true;
