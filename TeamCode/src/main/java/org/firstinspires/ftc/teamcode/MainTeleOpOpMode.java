@@ -20,7 +20,8 @@ public class MainTeleOpOpMode extends LinearOpMode {
     public static final boolean NEW_ROBOT = true;
 
     @Override
-    public void runOpMode() throws InterruptedException {/* Initialize shooter, drive, aprilTag, intake, and  distance sensor only if their respective enabled booleans are true */
+    public void runOpMode() throws InterruptedException {
+        /* Initialize shooter, drive, aprilTag, intake, and  distance sensor only if their respective enabled booleans are true */
         Shooter shooter = new Shooter();
         MecanumDrive drive = new MecanumDrive();
         AprilTag aprilTag = new AprilTag();
@@ -28,19 +29,19 @@ public class MainTeleOpOpMode extends LinearOpMode {
         DistanceSensor distanceSensor = new DistanceSensor();
 
         telemetry.addLine("After constructor");
-        if (SHOOT_ENABLED && !shooter.init(hardwareMap, gamepad2, telemetry, false, NEW_ROBOT)) {
+        if (SHOOT_ENABLED && !shooter.init(this, NEW_ROBOT)) {
             SHOOT_ENABLED = false;
         }
-        if (DRIVE_ENABLED && !drive.init(hardwareMap, telemetry, gamepad1)) {
+        if (DRIVE_ENABLED && !drive.init(this)) {
             DRIVE_ENABLED = false;
         }
-        if (CAMERA_ENABLED && !aprilTag.init(hardwareMap, telemetry, gamepad1, drive)) {
+        if (CAMERA_ENABLED && !aprilTag.init(this, drive)) {
             CAMERA_ENABLED = false;
         }
-        if (INTAKE_ENABLED && !intake.init(hardwareMap, telemetry, gamepad1)) {
+        if (INTAKE_ENABLED && !intake.init(this)) {
             INTAKE_ENABLED = false;
         }
-        if (DISTANCE_ENABLED && !distanceSensor.init(hardwareMap, telemetry)) {
+        if (DISTANCE_ENABLED && !distanceSensor.init(this)) {
             DISTANCE_ENABLED = false;
         }
         telemetry.addLine("After init");
