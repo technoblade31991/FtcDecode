@@ -65,7 +65,7 @@ public class Shooter {
             telemetry.update();
         }
         assert left_feeder != null;
-        left_feeder.setDirection(DcMotorSimple.Direction.REVERSE);
+        left_feeder.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Initialize right feeder servo
         try {
@@ -75,6 +75,7 @@ public class Shooter {
             telemetry.update();
         }
         assert right_feeder != null;
+        right_feeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Initialize launcher motor
         try {

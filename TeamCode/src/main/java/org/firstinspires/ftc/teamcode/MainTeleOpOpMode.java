@@ -75,16 +75,16 @@ public class MainTeleOpOpMode extends LinearOpMode {
              */
 
             if (gamepad1.left_trigger > 0.5 && DRIVE_ENABLED) {
-                forward = gamepad1.right_stick_y;
-                strafe = -gamepad1.right_stick_x;
+                forward = +gamepad1.right_stick_y;
+                strafe = gamepad1.right_stick_x;
                 rotate = gamepad1.left_stick_x;
      
                 drive.driveRelativeRobot(forward, strafe, rotate, 0.25);
             }
             else if (DRIVE_ENABLED) {
-                    forward = gamepad1.right_stick_y;
+                    forward = -gamepad1.right_stick_y;
                     // Strafe is reversed due to weird issues
-                    strafe = -gamepad1.right_stick_x;
+                    strafe = +gamepad1.right_stick_x;
                     rotate = gamepad1.left_stick_x;
                     drive.driveRelativeRobot(forward, strafe, rotate, 1);
             }

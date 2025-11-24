@@ -22,7 +22,7 @@ public class MainAutonomousOpMode extends LinearOpMode {
 
     static final double     DRIVE_SPEED             = 0.2;
     private DcMotor frontLeft, frontRight, backLeft, backRight;
-    double     TARGET_DISTANCE_INCHES  = -9.25; // Move backward 9.25 inches
+    double     TARGET_DISTANCE_INCHES  = 9.25; // Move backward 9.25 inches
 
     private static final boolean DRIVE_ENABLED = true;
     private static final boolean SHOOT_ENABLED = true;
@@ -69,8 +69,8 @@ public class MainAutonomousOpMode extends LinearOpMode {
 
                 shooter.launch_n_balls(NUM_BALLS);
             }
-            encoderDrive(0.5, -5, 5);
-            strafeLeftInches(20, 0.5);
+            encoderDrive(0.5, 5, 5);
+            strafeLeftInches(-20, 0.5);
         }
     }
 
