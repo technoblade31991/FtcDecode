@@ -41,7 +41,7 @@ public class Shooter {
     public static final double LAUNCH_FEED_MS_NO_RESET = 1_150; /* Time it takes for ball to pass through servos when reset is false.
                                                            * Note that currently this is equal to LAUNCH_FEED_MS_RESET.
                                                            */
-    public static final double LAUNCH_LAUNCHER_COMPLETE_MS = 200; /* Time for ball to launch once it is past servos */
+    public static final double LAUNCH_LAUNCHER_COMPLETE_MS = 400; /* Time for ball to launch once it is past servos */
 
     private static final double LAUNCH_LAUNCHER_ENFORCE_MS = 300; /* Time to wait before re-feeding when enforcing continuous launch */
     private double launchFeedMs;
