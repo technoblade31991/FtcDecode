@@ -64,11 +64,11 @@ public class MainAutonomousOpMode extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-            encoderDrive(DRIVE_SPEED, TARGET_DISTANCE_INCHES, 5.0);
             if (SHOOT_ENABLED) {
 
                 shooter.launch_n_balls(NUM_BALLS);
             }
+            encoderDrive(DRIVE_SPEED, TARGET_DISTANCE_INCHES, 5.0);
             encoderDrive(0.5, -5, 5);
             strafeLeftInches(20, 0.5);
         }
