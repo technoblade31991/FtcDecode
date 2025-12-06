@@ -70,7 +70,7 @@ public class MainAutonomousOpMode extends LinearOpMode {
             }
             encoderDrive(DRIVE_SPEED, TARGET_DISTANCE_INCHES, 5.0);
             encoderDrive(0.5, -5, 5);
-            strafeLeftInches(20, 0.5);
+            strafeLeftInches(23, 0.5);
         }
     }
 
